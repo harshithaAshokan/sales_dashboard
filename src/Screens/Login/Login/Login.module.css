@@ -1,0 +1,94 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #1e1e2f;
+    transition: background-color 0.5s ease;
+}
+
+.formContainer {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    background-color: #2a2a3b;
+    border-radius: 8px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 1s ease-in-out;
+    transition: transform 0.3s ease;
+}
+
+.formContainer:hover {
+    transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #f6ecec;
+}
+
+.input {
+    background-color: #a49fc7 !important;
+    border: none !important;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:focus{
+    background-color: #c0b7e8 !important;
+    box-shadow: 0 0 8px rgba(106, 90, 205, 0.5);
+}
+
+/* Checkbox styling */
+.checkbox {
+    color: #fff;
+}
+
+/* Button styling */
+.createAccountButton {
+    background-color: #6a5acd !important;
+    border: none !important;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.createAccountButton:hover {
+    background-color: #5a4dcd !important;
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .formContainer {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .formContainer {
+        width: 90%;
+        max-width: 320px;
+    }
+}

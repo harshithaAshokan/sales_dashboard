@@ -1,0 +1,113 @@
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #1e1e2f;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #2a2a3b;
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 24px;
+  color: #f6ecec;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Container for OTP input boxes */
+.otpContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* Space between each input box */
+  margin-bottom: 20px;
+}
+
+/* Individual OTP input box */
+.inputBox {
+  width: 40px; /* Box width */
+  height: 40px; /* Box height */
+  text-align: center; /* Center the text */
+  font-size: 18px; /* Text size */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #a49fc7 !important; /* Background color */
+  transition:0.2s ease-in-out;
+}
+
+/* Input box on focus */
+.inputBox:focus {
+  border-color: #6a5acd; /* Border color on focus */
+  box-shadow: 0 0 5px rgba(106, 90, 205, 0.5); /* Focus shadow */
+  outline: none; /* Remove default outline */
+}
+
+/* Button styles */
+.createAccountButton {
+  background-color: #6a5acd;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 10px;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.createAccountButton:hover {
+  background-color: #5a4dcd !important;
+  transform: scale(1.05);
+}
+
+.createAccountButton {
+  background-color: #6a5acd;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 10px;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.createAccountButton:hover {
+  background-color: #5a4dcd !important;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .formContainer {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  .input {
+    font-size: 14px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .createAccountButton {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
