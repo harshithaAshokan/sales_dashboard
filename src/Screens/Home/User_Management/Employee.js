@@ -1,7 +1,6 @@
 import React, { useEffect,useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  handleEmployeeList,
   handleSearch,
   handleShowAddModal,
   handleShowDeleteModal,
@@ -19,8 +18,7 @@ import FilterModal from "../Modal/FilterModal";
 import deleteicon from '../../../assets/delete.png'
 import updateicon from '../../../assets/system-update.png'
 import filtericon from '../../../assets/setting.png'
-import addicon from '../../../assets/invite.png'
-import reseticon from '../../../assets/reset.png'
+import { useToken } from "../../../utility/hooks";
 const { Content } = Layout;
 const { Title } = Typography;
 const text = <span>Filter</span>;
@@ -28,9 +26,11 @@ const text = <span>Filter</span>;
 export default function Dealer() {
   const dispatch = useDispatch();
   const selector = useSelector((state) => state.auth);
-  const data = useSelector((state) => state.login);
+  const token = useToken();
   const [currentPage, setCurrentPage] = useState(1); 
   const [totalItems, setTotalItems]=useState(0);
+  const [employeeList,setEmployeeList] = useState([]);
+  const [filter,setFilter] = useState(false);
   const handleAdd = () => {
     dispatch(handleShowAddModal(true));
     dispatch(handleUserType(4));
@@ -41,10 +41,6 @@ export default function Dealer() {
     dispatch(handleUserId(userId));
   };
 
-  const handleReset = () => {
-    dispatch(handleSearch({}))
-    handleEmployee();
-  }
 
   const handleUpdate = (userId) => {
     dispatch(handleShowUpdateModal(true));
@@ -56,42 +52,39 @@ export default function Dealer() {
     setCurrentPage(page); 
     };
 
-  const handleEmployee = () => {
+  const handleEmployee = (page = 1, pageSize = 10,values) => {
     const formData = new FormData();
-    formData.append("token", data.token);
+    formData.append("token", token);
     formData.append("type", "4");
-    if (selector.search?.userName) {
-      formData.append("username", selector.search.userName);
+    if (values?.userName) {
+      formData.append("username", values.userName);
     }
-    if (selector.search?.phoneNumber) {
-      formData.append("phoneNumber", selector.search.phoneNumber);
+    if (values?.phoneNumber) {
+      formData.append("phoneNumber", values.phoneNumber);
     }
-    if (selector.search?.dealer_id) {
-      formData.append("dealerId", selector.search.dealer_id);
+    if (values?.dealer_id) {
+      formData.append("dealerId", values.dealer_id);
     }
-    if (selector.search?.email) {
-      formData.append("email", selector.search.email);
+    if (values?.email) {
+      formData.append("email", values.email);
     }
-    listUsers(1, 10, formData)
+    listUsers(page,pageSize,formData)
       .then((response) => {
-        dispatch(handleEmployeeList(response.data.data.items));
+        setEmployeeList(response.data.data.items);
         setTotalItems(response.data.data.total_count);
       })
       .catch((error) => {
         console.log(error);
-      });
+      })
   };
 
-  const content = (
-    <FilterModal/>
-  );
 
   useEffect(() => {
-    if (data.token) {
-      handleEmployee();
+    if (token) {
+      handleEmployee(currentPage);
       dispatch(handleUserType(4));
     }
-  }, [data.token,selector.search,currentPage]);
+  }, [token,currentPage]);
 
   const columns = [
     {
@@ -145,8 +138,8 @@ export default function Dealer() {
   ];
 
   const datas =
-    selector.employeeList.length > 0
-      ? selector.employeeList.map((item,index) => ({
+    employeeList.length > 0
+      ? employeeList.map((item,index) => ({
         index:index+1,  
         userId: item.userId,
           username: item.userName,
@@ -161,19 +154,10 @@ export default function Dealer() {
     <Content className={classes.content}>
       <div className={classes.container}>
         <Title level={1} className={classes.title}>Employee Management</Title>
-        <div className="row">
-          <div className="col"> 
-            <Tooltip placement="bottom" title="Add Employee" >
-              <img src={addicon} width="20px" height="20px" onClick={handleAdd}></img>
-            </Tooltip></div>
-          <div className="col"> <Tooltip placement="bottom" title="Reset" >
-              <img src={reseticon} width="20px" height="20px" onClick={handleReset}></img>
-            </Tooltip></div>
-          <div className="col"><Popover placement="bottomLeft" title={text} content={content}>
-          <img src={filtericon} width="20px" height="20px"></img>
-          </Popover></div> 
-        </div>
+        <button className='btn btn-primary' onClick={handleAdd}>Add Admin</button>
+          <img src={filtericon} width="20px" height="20px" onClick={() => setFilter(!filter)}></img>
       </div>
+      <div className="px-4"> {filter && <FilterModal listapical={handleEmployee} /> }</div>
       <Table 
         columns={columns} 
         dataSource={datas} 

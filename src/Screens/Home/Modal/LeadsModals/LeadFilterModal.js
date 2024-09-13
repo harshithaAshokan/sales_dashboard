@@ -1,17 +1,11 @@
 import React from 'react';
-import { Button, Form, Input, Space, theme } from 'antd';
+import { Button, Form, Input, Space} from 'antd';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useDispatch, useSelector } from 'react-redux';
-import { handleSearch } from '../../../../redux/reducers/AuthReducers';
+const LeadFilterModal = ({listapical}) => {
 
-
-
-const LeadFilterModal = () => {
-
-  const dispatch = useDispatch();
+ 
   const userValidationSchema = Yup.object({
-    
     name: Yup.string(),
     lead_status: Yup.number(),
     lead_id:Yup.number(),
@@ -30,79 +24,69 @@ const LeadFilterModal = () => {
     },
     validationSchema: userValidationSchema,
     onSubmit: (values) => {
-      console.log('Form values on submit:', values);
-      dispatch(handleSearch(values));
-      handleReset();
+
+      listapical(1,10,values)
     },
   });
 
   
   const handleReset = () => {
+    listapical();
     formik.resetForm(); 
-    
   };
+
+ 
 
   return (
     <>
-      <Form
-       
-        name="advanced_search"
-        onFinish={formik.handleSubmit} 
-      >
-      
+      <div className='row'>
+       <div className='col'>
         <InputField
           formik={formik}
           name="name"
           label="Name"
           placeholder="Enter Name"
-        />
-
-        
-          <InputField
+        /></div>
+       <div className='col'><InputField
           formik={formik}
           name="lead_id"
           label="Lead ID"
           type="number"
           placeholder="Enter Lead ID"
-        />
-        
-        
-
-        {/* Phone Number Field */}
+        /></div>
+       <div className='col'>
         <InputField
           formik={formik}
           name="phone"
           label="Phone Number"
           placeholder="Enter Phone Number"
-        />
-
-        {/* Email Field */}
-        <InputField
+        /></div>
+       <div className='col'><InputField
           formik={formik}
           name="lead_status"
           label="Lead Status"
           placeholder="Enter Lead Status"
-        />
-
-      <InputField
+        /></div>
+       <div className='col'><InputField
           formik={formik}
           name="hot_lead"
           label="Hot Lead"
           placeholder="Enter Hot Lead"
-        />
-
+        /></div>
+      </div>
+        
         <Space size="small">
           {/* Search Button */}
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" onClick={formik.handleSubmit}>
             Search
           </Button>
 
           {/* Clear Button */}
-          <Button htmlType="button" onClick={handleReset}>
-            Clear
+          <Button  onClick={handleReset}>
+            Reset
           </Button>
         </Space>
-      </Form>
+     
     </>
   );
 };
@@ -128,3 +112,5 @@ function InputField({ formik, label, name, type = 'text', placeholder }) {
     </Form.Item>
   );
 }
+
+

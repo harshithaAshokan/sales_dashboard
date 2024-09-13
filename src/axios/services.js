@@ -100,3 +100,29 @@ export const dropdownEnquiry = (data) => {
 export const dropdownCompetitor = (data) => {
     return instance.post("/sales_mguru_api/dropdown/dropdownCompetitor",data)
 }
+
+export const listEnquiry = (page,size,data) => {
+    return instance.post(`/sales_mguru_api/masters/list_enquiry_type?page=${page}&size=${size}`,data)
+}
+
+export const createMasters = (data,value) => {
+    return instance.post(`/sales_mguru_api/masters/create_${value}`,data)
+}
+
+export const updateMasters = (data,value) => {
+    return instance.post(`/sales_mguru_api/masters/update_${value}`,data)
+}
+
+export const deleteMasters = (data,value) => {
+    return instance.post(`/sales_mguru_api/masters/delete_${value}`,data)
+}
+
+export const listRequirements = (page,size,data) => {
+    return instance.post(`/sales_mguru_api/masters/list_requirements?page=${page}&size=${size}`,data)
+}
+
+
+export const listCategory = (page,size,data) => {
+    return instance.post(`/sales_mguru_api/masters/list_category?page=${page}&size=${size}`,data)
+}
+

@@ -2,7 +2,6 @@ import React, { useEffect,useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FilterModal from "../../Modal/FilterModal";
 import {
-  handleAdminList,
   handleSearch,
   handleShowAddModal,
   handleShowDeleteModal,
@@ -11,63 +10,59 @@ import {
 } from "../../../../redux/reducers/AuthReducers";
 import AddModal from "../../Modal/AddModal";
 import DeleteModal from "../../Modal/DeleteModal";
-import { Space, Table,Layout, Typography,Popover,Pagination, Tooltip } from "antd";
+import { Space, Table,Layout, Typography,Pagination, Tooltip } from "antd";
 import { listUsers } from "../../../../axios/services";
 import classes from './Admin.module.css'
 import deleteicon from '../../../../assets/delete.png'
 import filtericon from '../../../../assets/setting.png'
-import addicon from '../../../../assets/invite.png'
-import reseticon from '../../../../assets/reset.png'
+import { useToken } from "../../../../utility/hooks";
 const { Content } = Layout;
 const { Title } = Typography;
 const text = <span>Filter</span>;
 export default function Admin() {
   const selector = useSelector((state) => state.auth);
-  const data = useSelector((state) => state.login);
+  const token = useToken();
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1); 
-    const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+  const [adminList,setAdminList] = useState([]);
+  const [filter,setFilter] = useState(false); 
   const handleAdd = () => {
     dispatch(handleShowAddModal(true));
     dispatch(handleUserType(2));
   };
 
-  const handleReset = () => {
-    dispatch(handleSearch({}))
-    handleAdmin();
-  }
-
   useEffect(() => {
-    if (data.token) {
-      handleAdmin();
+    if (token) {
+      handleAdmin(currentPage);
       dispatch(handleUserType(2))
     }
-  }, [data.token,selector.search,currentPage]);
+  }, [token,selector.search,currentPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page); 
     };
 
-  const handleAdmin = (page = 1, pageSize = 10) => {
+  const handleAdmin = (page = 1, pageSize = 10,values) => {
     const formData = new FormData();
-    formData.append("token", data.token);
+    formData.append("token", token);
     formData.append("type", "2");
     
-    if (selector.search?.userName) {
-      formData.append("username", selector.search.userName);
+    if (values?.userName) {
+      formData.append("username",values.userName);
     }
-    if (selector.search?.phoneNumber) {
-      formData.append("phoneNumber", selector.search.phoneNumber);
+    if (values?.phoneNumber) {
+      formData.append("phoneNumber", values.phoneNumber);
     }
-    if (selector.search?.dealer_id) {
-      formData.append("dealerId", selector.search.dealer_id);
+    if (values?.dealer_id) {
+      formData.append("dealerId", values.dealer_id);
     }
-    if (selector.search?.email) {
-      formData.append("email", selector.search.email);
+    if (values?.email) {
+      formData.append("email", values.email);
     }
     listUsers(page, pageSize, formData)
       .then((response) => {
-        dispatch(handleAdminList(response.data.data.items));
+        setAdminList(response.data.data.items);
         setTotalItems(response.data.data.total_count);
       })
       .catch((err) => {
@@ -76,9 +71,7 @@ export default function Admin() {
       console.log(selector.message);
   };
 
- const content = (
-    <FilterModal/>
-  );
+ 
   const handleDelete = (userId) => {
     dispatch(handleShowDeleteModal(true));
     dispatch(handleUserId(userId));
@@ -131,8 +124,8 @@ export default function Admin() {
   ];
 
   const datas =
-    selector.adminList.length > 0
-      ? selector.adminList.map((item,index) => ({
+    adminList.length > 0
+      ? adminList.map((item,index) => ({
         index:index+1,
           userId: item.userId,
           username: item.userName,
@@ -152,19 +145,10 @@ export default function Admin() {
         <Title level={1} className={classes.title}>
           Admin Management
         </Title>
-        <div className="row">
-          <div className="col"> 
-            <Tooltip placement="bottom" title="Add Employee" >
-              <img src={addicon} width="20px" height="20px" onClick={handleAdd}></img>
-            </Tooltip></div>
-          <div className="col"> <Tooltip placement="bottom" title="Reset" >
-              <img src={reseticon} width="20px" height="20px" onClick={handleReset}></img>
-            </Tooltip></div>
-          <div className="col"><Popover placement="bottomLeft" title={text} content={content}>
-          <img src={filtericon} width="20px" height="20px"></img>
-          </Popover></div> 
-        </div>
-      </div>
+          <button className='btn btn-primary' onClick={handleAdd}>Add Admin</button>
+          <img src={filtericon} width="20px" height="20px" onClick={() => setFilter(!filter)}></img>
+          </div>
+      <div className="px-4"> {filter && <FilterModal listapical={handleAdmin}/>}</div>
         <Table 
           columns={columns}  
           dataSource={datas} 
@@ -173,6 +157,7 @@ export default function Admin() {
         />
         {selector.showAddModal && <AddModal listapical={handleAdmin}/>}
         {selector.showDeleteModal && <DeleteModal listapical={handleAdmin}/>}
+        
         <Pagination
          current={currentPage}
          pageSize={10} 

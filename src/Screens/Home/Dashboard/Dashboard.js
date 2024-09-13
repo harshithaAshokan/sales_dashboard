@@ -1,23 +1,21 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import {  useSelector } from 'react-redux';
 import { datacount } from '../../../axios/services';
-import { handleProducts } from '../../../redux/reducers/AuthReducers';
 import { Card, Col, Row, Layout, Typography } from 'antd';
 import classes from './Dashboard.module.css'
+import { useToken } from '../../../utility/hooks';
 const { Content } = Layout;
 const { Title } = Typography;
 
 export default function Dashboard() {
-  const selector = useSelector((state) => state.auth);
-  const userData = useSelector((state) => state.login);
-  const dispatch = useDispatch();
-
+  const token = useToken();
+  const [productList,setProductList] = useState([]);
   const handleDashboard = () => {
     const formData = new FormData();
-    formData.append("token", userData.token);
+    formData.append("token", token);
     datacount(formData)
       .then((response) => {
-        dispatch(handleProducts(response.data.data));
+        setProductList(response.data.data);
       })
       .catch((error) => {
         console.log(error);
@@ -25,18 +23,18 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (userData.token) {
+    if (token) {
       handleDashboard();
     }
-  }, [userData.token]);
+  }, [token]);
 
   return (
     
      <Layout className={classes.layout}>
-        <Title level={1} className='mt-3 text-white'>Dashboard</Title>
+        <Title level={1} className='mt-3 text-dark'>Dashboard</Title>
         <Row>
-          {selector.productList.length > 0 ? (
-            selector.productList.map((item, index) => (
+          {productList.length > 0 ? (
+            productList.map((item, index) => (
               <Col span={8} key={index} className='p-5'>
                 <Card
                   title={item.displayName}

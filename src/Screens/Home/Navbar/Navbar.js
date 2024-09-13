@@ -1,24 +1,22 @@
-
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   ContainerOutlined,
   MailOutlined,
   LogoutOutlined,
   UserOutlined,
-} from '@ant-design/icons';
-import { Avatar, Layout, Menu } from 'antd';
+} from "@ant-design/icons";
+import { Avatar, Layout, Menu } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useSelector } from 'react-redux';
 import { MdOutlineDashboard } from "react-icons/md";
-import admin from '../../../assets/leadership.png'
-import dealer from '../../../assets/id-card.png'
-import employee from '../../../assets/employee.png'
-import classes from './Navbar.module.css'
+import admin from "../../../assets/leadership.png";
+import dealer from "../../../assets/id-card.png";
+import employee from "../../../assets/employee.png";
+import classes from "./Navbar.module.css";
 const { Sider } = Layout;
 
 const Navbar = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const data = useSelector((state) => state.login);
+
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -26,20 +24,8 @@ const Navbar = () => {
 
   const navigate = useNavigate();
 
-  const handleDashboard = () => {
-    navigate("/dashboard");
-  };
-
-  const handleAdmin = () => {
-    navigate("/admin");
-  };
-
-  const handleDealer = () => {
-    navigate("/dealer");
-  };
-
-  const handleEmployee = () => {
-    navigate("/employee");
+  const Navigate = (path) => {
+    navigate(path);
   };
 
   const handleLogout = () => {
@@ -47,58 +33,75 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const handleLead = () => {
-    navigate("/lead");
-  }
-
   const items = [
     {
-      key: '1',
-      icon: <MdOutlineDashboard/>,
-      label: 'Dashboard',
-      onClick: handleDashboard
+      key: "1",
+      icon: <MdOutlineDashboard />,
+      label: "Dashboard",
+
+      onClick: () => Navigate("/dashboard"),
     },
     {
-      key: 'sub1',
-      label: 'User Management',
+      key: "sub1",
+      label: "User Management",
       icon: <MailOutlined />,
-      children: [        
+      children: [
         {
-          key: '3',
-          label: 'Admin',
+          key: "3",
+          label: "Admin",
           icon: <img src={admin} width="20px" height="20px"></img>,
-          onClick: handleAdmin
+          onClick: () => Navigate("/admin"),
         },
         {
-          key: '4',
-          label: 'Dealer',
+          key: "4",
+          label: "Dealer",
           icon: <img src={dealer} width="20px" height="20px"></img>,
-          onClick: handleDealer
+          onClick: () => Navigate("/dealer"),
         },
         {
-          key: '5',
-          label: 'Employee',
+          key: "5",
+          label: "Employee",
           icon: <img src={employee} width="20px" height="20px"></img>,
-          onClick: handleEmployee
+          onClick: () => Navigate("/employee"),
         },
       ],
     },
     {
-      key: '6',
+      key: "6",
       icon: <ContainerOutlined />,
-      label: 'Leads',
-      onClick: handleLead
+      label: "Leads",
+      onClick: () => Navigate("/lead"),
     },
     {
-      key: '7',
+      key: "7",
       icon: <ContainerOutlined />,
-      label: 'Masters',
+      label: "Masters",
+      children: [
+        {
+          key: "8",
+          label: "Requirements",
+          icon: <img src={admin} width="20px" height="20px"></img>,
+          onClick: () => Navigate("/requirements"),
+        },
+        {
+          key: "9",
+          label: "Enquiry",
+          icon: <img src={dealer} width="20px" height="20px"></img>,
+          onClick: () => Navigate("/enquiry"),
+        },
+        {
+          key: "10",
+          label: "Category",
+          icon: <img src={employee} width="20px" height="20px"></img>,
+          onClick: () => Navigate("/category"),
+        },
+      ],
     },
     {
-      key: '8',
+      key: "11",
       icon: <LogoutOutlined />,
-      label: 'Logout',
-      onClick: handleLogout
+      label: "Logout",
+      onClick: handleLogout,
     },
   ];
 
@@ -111,11 +114,11 @@ const Navbar = () => {
         collapsed={collapsed}
         onCollapse={toggleCollapsed}
       >
-        <div style={{ padding: '16px', textAlign: 'center' }}>
+        <div style={{ padding: "16px", textAlign: "center" }}>
           <Avatar size={64} icon={<UserOutlined />} />
           {!collapsed && (
             <>
-              <h3 className='text-white'>{username}</h3>
+              <h3 className="text-white">{username}</h3>
             </>
           )}
         </div>
@@ -123,6 +126,7 @@ const Navbar = () => {
           mode="inline"
           theme="dark"
           items={items}
+          defaultSelectedKeys={["1"]}
         />
       </Sider>
       <Layout className="site-layout">
@@ -135,8 +139,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-
-
-

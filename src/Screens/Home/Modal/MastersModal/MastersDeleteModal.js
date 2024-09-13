@@ -1,11 +1,12 @@
 import React from 'react';
 import { Modal, message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { handleShowDeleteModal } from '../../../redux/reducers/AuthReducers';
-import { deleteuser } from '../../../axios/services';
-import { useToken } from '../../../utility/hooks';
+import { deleteMasters, deleteRequirements } from '../../../../axios/services';
+import { handleShowDeleteModal } from '../../../../redux/reducers/AuthReducers';
+import { useToken } from '../../../../utility/hooks';
 
-export default function DeleteModal({ listapical }) {
+
+export default function MastersDeleteModal({ listapical,value }) {
   const selector = useSelector((state) => state.auth);
   const token = useToken();
   const dispatch = useDispatch();
@@ -13,14 +14,19 @@ export default function DeleteModal({ listapical }) {
   const handleOk = () => {
     const formData = new FormData();
     formData.append("token", token);
-    formData.append("userId", selector.user_id);
+    formData.append("dataId", selector.user_id);
     
-    deleteuser(formData)
+    deleteMasters(formData,value)
       .then((response) => {
         console.log(response.data);
-        message.success(response.data.msg)
+        message.success(response.data.msg).then(() => {
+          if(response.data.status)
+          {
             dispatch(handleShowDeleteModal(false));
             listapical(); 
+          }
+        });
+        
       })
       .catch((err) => {
         console.log(err);

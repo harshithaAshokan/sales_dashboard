@@ -1,18 +1,22 @@
 import React, { useState , useEffect} from "react";
-import { Modal, Form, Input,Select } from "antd";
+import { Form, Input,Select, message, Layout, Typography,Row,Col,Button } from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
 import { useDispatch, useSelector } from "react-redux";
 import { handleShowAddModal, handleShowUpdateModal } from "../../../../redux/reducers/AuthReducers";
-import { updateLead, viewLead} from "../../../../axios/services";
-
-export default function LeadsAddModal({ listapical }) {
+import { dropdownRequirements, updateLead, viewLead} from "../../../../axios/services";
+import classes from './LeadsEditModal.module.css'
+import { useNavigate } from "react-router-dom";
+import { useToken } from "../../../../utility/hooks";
+const { Content } = Layout;
+const { Title } = Typography;
+export default function LeadsEditModal({ listapical }) {
   const dispatch = useDispatch();
   const [componentVariant, setComponentVariant] = useState("filled");
-  const data = useSelector((state) => state.login);
+  const token = useToken();
   const selector = useSelector((state) => state.auth);
-
+  const [requirements,setRequirements] = useState([]);
+ const navigate = useNavigate();
   const handleCancel = () => {
     console.log("Clicked cancel button");
     dispatch(handleShowAddModal(false));
@@ -20,13 +24,13 @@ export default function LeadsAddModal({ listapical }) {
   };
 
   const formItemLayout = {
-    labelCol: { xs: { span: 27 }, sm: { span: 8 } },
-    wrapperCol: { xs: { span: 24 }, sm: { span: 14 } },
+    labelCol: { xs: { span: 10 }, sm: { span: 14 } },
+    wrapperCol: { xs: { span: 14 }, sm: { span: 14 } },
   };
 
   const handleUpdate = () => {
     const updateData = new FormData();
-    updateData.append("token", data.token);
+    updateData.append("token", token);
     updateData.append("leadId", selector.user_id);
     viewLead(updateData)
       .then((response) => {
@@ -79,7 +83,7 @@ export default function LeadsAddModal({ listapical }) {
   };
   const handleUpdateUser = (values) => {
     const formData = new FormData();
-    formData.append("token", data.token);
+    formData.append("token", token);
     formData.append("name", values.name);
     formData.append("phone_country_code", values.phone_country_code);
     formData.append("address",values.address);
@@ -89,13 +93,28 @@ export default function LeadsAddModal({ listapical }) {
     updateLead(formData)
       .then((response) => {
         console.log("API response:", response.data);
-        listapical();
-        handleCancel();
+        message.success(response.data.msg)
+        navigate("/lead")
       })
       .catch((err) => {
         console.error("API error:", err);
       });
   };
+
+  const handleRequirements = () =>{
+    const formData = new FormData();
+    formData.append("token",token)
+    dropdownRequirements(formData).then((response) => {
+      console.log(response.data.data);
+      setRequirements(response.data.data)
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
+
+  useEffect(() => {
+    handleRequirements();
+  },[])
 
   const userValidationSchema = Yup.object({
     email: Yup.string().email("Invalid email format"),
@@ -190,276 +209,397 @@ export default function LeadsAddModal({ listapical }) {
   });
 
   useEffect(() => {
-    if (selector.showUpdateModal) {
+    
       handleUpdate();
-    }
-  }, [selector.showUpdateModal]);
+    
+  }, []);
 
   return (
-    <Modal
-      title={"ADD LEAD DETAILS"}
-      open={selector.showUpdateModal}
-      onOk={formik.handleSubmit}
-      onCancel={handleCancel}
-    >
-      <Form
-        {...formItemLayout}
-        variant={componentVariant}
-        style={{ maxWidth: 600 }}
-      >
-        <InputField
-          formik={formik}
-          name="name"
-          label="Name"
-          placeholder="Enter Name"
-        />
-        <InputField
-          formik={formik}
-          name="remarks"
-          label="Remarks"
-          placeholder="Enter Remarks"
-        />
-        <InputField
-          formik={formik}
-          name="phone_country_code"
-          label="Phone_country_code"
-          placeholder="Enter Phone_country_code"
-        />
-        <InputField
-          formik={formik}
-          name="landline_number"
-          type="number"
-          label="Landline_number"
-          placeholder="Enter your Landline_number"
-        />
-        <InputField
-          formik={formik}
-          name="whatsapp_country_code"
-          
-          label="whatsapp_country_code"
-          placeholder="Enter your whatsapp_country_code"
-        />
-        <InputField
-          formik={formik}
-          name="alter_country_code"
-         
-          label="alter_country_code"
-          placeholder="Enter your alter_country_code"
-        />
-        <InputField
-          formik={formik}
-          name="company_name"
-          
-          label="Company Name"
-          placeholder="Enter your Company Name"
-        />
-        <InputField
-          formik={formik}
-          name="contact_person"
-         
-          label="contact_person"
-          placeholder="Enter your contact_person"
-        />
-        <InputField
-          formik={formik}
-          name="address"
-          type="text"
-          label="address"
-          placeholder="Enter your address"
-        />
-        
-        
-        <InputField
-          formik={formik}
-          name="city"
-          label="City"
-          placeholder="Enter your city"
-        />
-        <InputField
-          formik={formik}
-          name="country"
-          label="Country"
-          placeholder="Enter your country"
-        />
-        <InputField
-          formik={formik}
-          name="state"
-          label="State"
-          placeholder="Enter your State"
-        />
-        <InputField
-          formik={formik}
-          name="area"
-          label="Area"
-          placeholder="Enter Area"
-        />
-        <InputField
-          formik={formik}
-          name="phone"
-          type="number"
-          label="Phone"
-          placeholder="Enter Phone"
-        />
-        <InputField
-          formik={formik}
-          name="email"
-          type="email"
-          label="Email"
-          placeholder="Enter email"
-        />
-        <InputField
-          formik={formik}
-          name="alternative_no"
-          type="number"
-          label="Alternative_no"
-          placeholder="Enter alternative_no"
-        />
-        <InputField
-          formik={formik}
-          name="whatsapp_no"
-          type="number"
-          label="Whatsapp_no"
-          placeholder="Enter Whatsapp_no"
-        />
-        <InputField
-          formik={formik}
-          name="customer_category_id"
-          type="number"
-          label="customer_category_id"
-          placeholder="Enter customer_category_id"
-        />
-        <InputField
-          formik={formik}
-          name="enquiry_type_id"
-          type="number"
-          label="enquiry_type_id"
-          placeholder="Enter enquiry_type_id"
-        />
-       <Form.Item
-  name="requirements_id"
-  label="Requirements ID"
-  validateStatus={formik.touched.requirements_id && formik.errors.requirements_id ? "error" : ""}
-  help={formik.touched.requirements_id && formik.errors.requirements_id ? formik.errors.requirements_id : ""}
->
-<Select
-  placeholder="Select Dealer ID"
-  value={formik.values.requirements_id}
-  onChange={(value) => formik.setFieldValue("requirements_id", value)}
-  onBlur={() => formik.setFieldTouched("requirements_id", true)}
-  allowClear
->
-  {selector.requirements.length > 0 ? (
-    selector.requirements.map((item) => (
-      <Select.Option key={item.RequirementsId} value={item.RequirementsId}>
-        {item.RequirementsName}
-      </Select.Option>
-    ))
-  ) : (
-    <Select.Option disabled>No Requirements Available</Select.Option>
-  )}
-</Select>
+    <>
+    <Layout className={`ms-5 ${classes.layout}`}>
+     <Content className={`ms-5 ${classes.content}`}>
+        <Form
+          className="ms-5"
+          variant={componentVariant}
+          style={{ maxWidth: 600 }}
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="name"
+                label="Name"
+                placeholder="Enter Name"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="remarks"
+                label="Remarks"
+                placeholder="Enter Remarks"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="phone_country_code"
+                label="Phone_country_code"
+                placeholder="Enter Phone_country_code"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="landline_number"
+                type="number"
+                label="Landline_number"
+                placeholder="Enter your Landline_number"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="whatsapp_country_code"
+                label="whatsapp_country_code"
+                placeholder="Enter your whatsapp_country_code"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="alter_country_code"
+                label="alter_country_code"
+                placeholder="Enter your alter_country_code"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="company_name"
+                label="Company Name"
+                placeholder="Enter your Company Name"
+              />
+           </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="contact_person"
+                label="contact_person"
+                placeholder="Enter your contact_person"
+              />
+           </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="address"
+                label="address"
+                placeholder="Enter your address"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="city"
+                label="City"
+                placeholder="Enter your city"
+              />
+            </Col>
+          </Row>
 
-</Form.Item>
-        <InputField
-          formik={formik}
-          name="dealer_id"
-          type="number"
-          label="dealer_id"
-          placeholder="Enter dealer_id"
-        />
-        <InputField
-          formik={formik}
-          name="recievedDate"
-          type="number"
-          label="recievedDate"
-          placeholder="Enter recievedDate"
-        />
-        <InputField
-          formik={formik}
-          name="referedBy"
-          type="number"
-          label="referedBy"
-          placeholder="Enter referedBy"
-        />
-         <InputField
-          formik={formik}
-          name="refer_country_code"
-          type="number"
-          label="refer_country_code"
-          placeholder="Enter refer_country_code"
-        />
-        <InputField
-          formik={formik}
-          name="notes"
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="country"
+                label="Country"
+                placeholder="Enter your country"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="state"
+                label="State"
+                placeholder="Enter your State"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="area"
+                label="Area"
+                placeholder="Enter Area"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="phone"
+                type="number"
+                label="Phone"
+                placeholder="Enter Phone"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="email"
+                type="email"
+                label="Email"
+                placeholder="Enter email"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="alternative_no"
+                type="number"
+                label="Alternative_no"
+                placeholder="Enter alternative_no"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="whatsapp_no"
+                type="number"
+                label="Whatsapp_no"
+                placeholder="Enter Whatsapp_no"
+              />
+           </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="customer_category_id"
+                type="number"
+                label="customer_category_id"
+                placeholder="Enter customer_category_id"
+              />
+           </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="enquiry_type_id"
+                type="number"
+                label="enquiry_type_id"
+                placeholder="Enter enquiry_type_id"
+              />
+           </Col>
+            <Col span={12}>
+              <Form.Item
+                name="requirements_id"
+                label="Requirements ID"
+                validateStatus={
+                  formik.touched.requirements_id &&
+                  formik.errors.requirements_id
+                    ? "error"
+                    : ""
+                }
+                help={
+                  formik.touched.requirements_id &&
+                  formik.errors.requirements_id
+                    ? formik.errors.requirements_id
+                    : ""
+                }
+              >
+                <Select
+                  placeholder="Select Dealer ID"
+                  value={formik.values.requirements_id}
+                  onChange={(value) =>
+                    formik.setFieldValue("requirements_id", value)
+                  }
+                  onBlur={() => formik.setFieldTouched("requirements_id", true)}
+                  allowClear
+                >
+                  {requirements.length > 0 ? (
+                    requirements.map((item) => (
+                      <Select.Option
+                        key={item.RequirementsId}
+                        value={item.RequirementsId}
+                      >
+                        {item.RequirementsName}
+                      </Select.Option>
+                    ))
+                  ) : (
+                    <Select.Option disabled>
+                      No Requirements Available
+                    </Select.Option>
+                  )}
+                </Select>
+              </Form.Item>
+              </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="dealer_id"
+                type="number"
+                label="dealer_id"
+                placeholder="Enter dealer_id"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="recievedDate"
+                type="number"
+                label="recievedDate"
+                placeholder="Enter recievedDate"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="referedBy"
+                type="number"
+                label="referedBy"
+                placeholder="Enter referedBy"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="refer_country_code"
+                type="number"
+                label="refer_country_code"
+                placeholder="Enter refer_country_code"
+              />
+           </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="notes"
+                label="notes"
+                placeholder="Enter notes"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="description"
+                label="description"
+                placeholder="Enter description"
+              />
+           </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="isNew"
+                type="number"
+                label="isNew"
+                placeholder="Enter isNew"
+              />
+           </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="latitude"
+                type="number"
+                label="Latitude"
+                placeholder="Enter Latitude"
+              />
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="longitude"
+                type="number"
+                label="longitude"
+                placeholder="Enter longitude"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="customerId"
+                type="number"
+                label="customerId"
+                placeholder="Enter customerId"
+              />
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="upload_file"
+                label="upload_file"
+                placeholder="Enter upload_file"
+              />
+            </Col>
+            <Col span={12}>
+              {" "}
+              <InputField
+                formik={formik}
+                name="approximate_amount"
+                type="number"
+                label="approximate_amount"
+                placeholder="Enter approximate_amount"
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="pincode"
+                type="number"
+                label="Pincode"
+                placeholder="Enter pincode"
+              />
+            </Col>
+            <Col span={12}>
+              <InputField
+                formik={formik}
+                name="schedule_date"
+                type="number"
+                label="schedule_date"
+                placeholder="Enter schedule_date"
+              />
+           </Col>
+          </Row>
+          <Form.Item>
+            <Button onClick={formik.handleSubmit}>
+              Submit
+            </Button>
+          </Form.Item>
           
-          label="notes"
-          placeholder="Enter notes"
-        />
-         <InputField
-          formik={formik}
-          name="description"
-         
-          label="description"
-          placeholder="Enter description"
-        />
-        <InputField
-          formik={formik}
-          name="isNew"
-          type="number"
-          label="isNew"
-          placeholder="Enter isNew"
-        />
-         <InputField
-          formik={formik}
-          name="latitude"
-          type="number"
-          label="Latitude"
-          placeholder="Enter Latitude"
-        />
-         <InputField
-          formik={formik}
-          name="longitude"
-          type="number"
-          label="longitude"
-          placeholder="Enter longitude"
-        />
-        <InputField
-          formik={formik}
-          name="customerId"
-          type="number"
-          label="customerId"
-          placeholder="Enter customerId"
-        />
-        <InputField
-          formik={formik}
-          name="pincode"
-          type="number"
-          label="Pincode"
-          placeholder="Enter pincode"
-        />
-        <InputField
-          formik={formik}
-          name="schedule_date"
-          type="number"
-          label="schedule_date"
-          placeholder="Enter schedule_date"
-        />
-        <InputField
-          formik={formik}
-          name="upload_file"
-          label="upload_file"
-          placeholder="Enter upload_file"
-        />
-        <InputField
-          formik={formik}
-          name="approximate_amount"
-          type="number"
-          label="approximate_amount"
-          placeholder="Enter approximate_amount"
-        />
-        <Form.Item wrapperCol={{ offset: 6, span: 16 }}></Form.Item>
-      </Form>
-    </Modal>
+        </Form></Content>
+        </Layout>
+        
+      {/* </Modal> */}
+    </>
   );
 }
 

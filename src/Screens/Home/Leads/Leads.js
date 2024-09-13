@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  handleLeadList,
-  handleShowAddModal,
+  
   handleShowDeleteModal,
   handleUserId,
-  handleShowUpdateModal,
+ 
   handleUpdateStatusModal,
   handleReassign,
-  handleDealerId,
+ 
   handleShowIsActiveModal,
-  handleIsActive,
-  handleSearch,
+  
 } from "../../../redux/reducers/AuthReducers";
 import { Space, Table, Layout, Typography, Pagination, Tooltip, Popover } from "antd";
 import { listLead } from "../../../axios/services";
-import LeadsAddModal from "../Modal/LeadsModals/LeadAddModal";
+
 import classes from "./Leads.module.css";
 import LeadsDeleteModal from "../Modal/LeadsModals/LeadsDeleteModal";
-import LeadsEditModal from "../Modal/LeadsModals/LeadsEditModal";
+
 import LeadUpdateStatusModal from "../Modal/LeadsModals/LeadsUpdateStatusModal";
 import Reassignmodal from "../Modal/LeadsModals/Reassignmodal";
 import filledbookmark from "../../../assets/bookmark (2).png";
@@ -29,65 +27,66 @@ import updateicon from "../../../assets/system-update.png";
 import filtericon from "../../../assets/setting.png";
 import reassignicon from "../../../assets/paper.png";
 import updatestatusicon from "../../../assets/update.png";
-import addicon from '../../../assets/invite.png'
-import reseticon from '../../../assets/reset.png'
+
 import LeadFilterModal from "../Modal/LeadsModals/LeadFilterModal";
+import { useNavigate } from "react-router-dom";
+import { useToken } from "../../../utility/hooks";
 const { Content } = Layout;
 const { Title } = Typography;
 const text = <span>Filter</span>;
 export default function Leads() {
   const selector = useSelector((state) => state.auth);
-  const data = useSelector((state) => state.login);
+  const token = useToken();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [leadList,setLeadList] = useState([]);
+  const [isActive,setIsActive] = useState(null);
+  const [filter,setFilter] = useState(false);
   const handleAdd = () => {
-    dispatch(handleShowAddModal(true));
+    navigate("/leadsAdd")
+    
   };
-  const handleReset = () => {
-    dispatch(handleSearch({}))
-    handleLeads();
-  }
+ 
 
   useEffect(() => {
-    if (data.token) {
-      handleLeads();
+    if (token) {
+      handleLeads(currentPage);
     }
-  }, [data.token, currentPage,selector.search]);
+  }, [token,currentPage,selector.search]);
 
-  const content = (
-    <LeadFilterModal/>
-  );
+ 
 
-  const handleLeads = (page = 1, pageSize = 10) => {
+  const handleLeads = (page = 1, pageSize = 10,values) => {
     const formData = new FormData();
-    formData.append("token", data.token);
-    if(selector.search.name)
+    formData.append("token", token);
+    if(values?.name)
     {
-      formData.append("name",selector.search.name);
+      formData.append("name",values.name);
     }
-    if(selector.search.lead_status)
+    if(values?.lead_status)
       {
-        formData.append("lead_status",selector.search.lead_status);
+        formData.append("lead_status",values.lead_status);
       }
-      if(selector.search.lead_id)
+      if(values?.lead_id)
         {
-          formData.append("lead_id",selector.search.lead_id);
+          formData.append("lead_id",values.lead_id);
         }
-        if(selector.search.hot_lead)
+        if(values?.hot_lead)
           {
-            formData.append("hot_lead",selector.search.hot_lead);
+            formData.append("hot_lead",values.hot_lead);
           }
-          if(selector.search.phone)
+          if(values?.phone)
             {
-              formData.append("phone",selector.search.phone);
+              formData.append("phone",values.phone);
             }
 
 
     listLead(page, pageSize, formData)
       .then((response) => {
         console.log(response.data);
-        dispatch(handleLeadList(response.data.data.items));
+        setLeadList(response.data.data.items);
         setTotalItems(response.data.data.total_count);
       })
       .catch((err) => {
@@ -105,8 +104,8 @@ export default function Leads() {
   };
 
   const handleUpdate = (userId) => {
-    dispatch(handleShowUpdateModal(true));
     dispatch(handleUserId(userId));
+    navigate("/leadsUpdate");
   };
 
   const handleUpdateStatus = (userId) => {
@@ -121,8 +120,8 @@ export default function Leads() {
 
   const handleActive = (userId, isActive) => {
     dispatch(handleShowIsActiveModal(true));
-    dispatch(handleDealerId(userId));
-    dispatch(handleIsActive(isActive));
+    dispatch(handleUserId(userId));
+    setIsActive(isActive);
   };
   
   const columns = [
@@ -156,6 +155,11 @@ export default function Leads() {
       title: "Lead Status Name",
       dataIndex: "leadstatusname",
       key: "leadstatusname",
+    },
+    {
+      title: "Assigned To",
+      dataIndex: "assignedTo",
+      key: "assignedTo",
     },
     {
       title: "Action",
@@ -207,8 +211,8 @@ export default function Leads() {
   ];
 
   const datas =
-    selector.leadList.length > 0
-      ? selector.leadList.map((item,index) => ({
+    leadList.length > 0
+      ? leadList.map((item,index) => ({
           index:index+1,
           userId: item.leadId,
           name: item.leadName,
@@ -216,9 +220,9 @@ export default function Leads() {
           phoneNumber: item.mobile,
           isActive: item.isActive,
           leadstatusname: item.leadStatusName,
+          assignedTo:item.assignedTo
         }))
       : [];
-  console.log(selector.leadList, "lead");
   return (
     <Layout className={classes.layout}>
       <Content className={classes.content}>
@@ -226,38 +230,26 @@ export default function Leads() {
           <Title level={1} className={classes.title}>
             Leads Management
           </Title>
-          <div className="row">
-          <div className="col"> 
-            <Tooltip placement="bottom" title="Add Employee" >
-              <img src={addicon} width="20px" height="20px" onClick={handleAdd}></img>
-            </Tooltip></div>
-          <div className="col"> <Tooltip placement="bottom" title="Reset" >
-              <img src={reseticon} width="20px" height="20px" onClick={handleReset}></img>
-            </Tooltip></div>
-          <div className="col"><Popover placement="bottomLeft" title={text} content={content}>
-          <img src={filtericon} width="20px" height="20px"></img>
-          </Popover></div> 
-        </div>
-        </div>
+          <button className='btn btn-primary' onClick={handleAdd}>Add Admin</button>
+          <img src={filtericon} width="20px" height="20px" onClick={() => setFilter(!filter)}></img>
+          </div>
+      <div className="px-4"> {filter && <LeadFilterModal listapical={handleLeads}/>}</div>
         <Table
           columns={columns}
           dataSource={datas}
           pagination={false}
           className={classes.table}
         />
-        {selector.showAddModal && <LeadsAddModal listapical={handleLeads} />}
         {selector.showDeleteModal && (
           <LeadsDeleteModal listapical={handleLeads} />
-        )}
-        {selector.showUpdateModal && (
-          <LeadsEditModal listapical={handleLeads} />
         )}
         {selector.showUpdateStatusModal && (
           <LeadUpdateStatusModal listapical={handleLeads} />
         )}
-        {selector.reassignlead && <Reassignmodal listapical={handleLeads} />}
+        {selector.reassignlead && 
+        <Reassignmodal listapical={handleLeads} />}
         {selector.showIsActiveModal && (
-          <IsActiveModal listapical={handleLeads} />
+          <IsActiveModal listapical={handleLeads} isActive={isActive} />
         )}
         <Pagination
           current={currentPage}

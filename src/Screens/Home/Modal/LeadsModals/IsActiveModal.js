@@ -3,18 +3,18 @@ import { Modal } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { handleShowIsActiveModal } from '../../../../redux/reducers/AuthReducers';
 import { hotLead } from '../../../../axios/services';
+import { useToken } from '../../../../utility/hooks';
 
-export default function IsActiveModal({ listapical }) {
+
+export default function IsActiveModal({ listapical,isActive }) {
   const selector = useSelector((state) => state.auth);
-  const data = useSelector((state) => state.login);
+  const token = useToken();
   const dispatch = useDispatch();
-   console.log(selector.isActive,"ACTIVE")
     const handleOk = () => {
-    let isActive = selector.isActive == "0" ? "1" : "0";  
-     console.log(isActive,"after")
+    isActive = (isActive === 0) ? 1 : 0;  
     const formData = new FormData();
-    formData.append("token", data.token);
-    formData.append("leadId", selector.dealer_ids);
+    formData.append("token", token);
+    formData.append("leadId", selector.user_id);
     formData.append("isActive", isActive);
 
     hotLead(formData)
@@ -42,7 +42,7 @@ export default function IsActiveModal({ listapical }) {
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <p>Are you sure you want to {selector.isActive == "1" ? 'remove' : 'add'} the priority?</p>
+        <p>Are you sure you want to {isActive == "1" ? 'remove' : 'add'} the priority?</p>
       </Modal>
     </>
   );

@@ -10,23 +10,24 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  handleCompetitorList,
-  handleEnquiryList,
-  handleLeadStatusList,
   handleUpdateStatusModal,
 } from "../../../../redux/reducers/AuthReducers";
+import { useToken } from "../../../../utility/hooks";
 
 export default function LeadUpdateStatusModal({ listapical }) {
   const selector = useSelector((state) => state.auth);
-  const data = useSelector((state) => state.login);
+  const token = useToken();
   const dispatch = useDispatch();
   const [date, setDate] = useState("");
+  const [leadStatusList,setLeadStatusList] = useState([]);
+  const [enquiry,setEnquiry] = useState([])
+  const [competitor,setCompetitor] = useState([])
 
   // Handle form submission
   const handleOk = (values) => {
     console.log("Form values on submit:", values); // Debugging
     const formData = new FormData();
-    formData.append("token", data.token);
+    formData.append("token", token);
     formData.append("leadId", selector.user_id);
     formData.append("leadStatus", values.leadStatus);
     formData.append("comment", values.comments);
@@ -85,38 +86,45 @@ export default function LeadUpdateStatusModal({ listapical }) {
     },
   });
 
-  // Fetch lead statuses
-  useEffect(() => {
+  const handleListLeadStatus = () => {
     const formData = new FormData();
-    formData.append("token", data.token);
+    formData.append("token", token);
     listLeadStatus(formData)
       .then((response) => {
-        dispatch(handleLeadStatusList(response.data.data));
+        setLeadStatusList(response.data.data);
       })
       .catch((Err) => {
         console.log("Lead Status Error:", Err);
       });
-  }, [data.token, dispatch]);
-
-  // Fetch enquiry types and competitors
+  }
+  // Fetch lead statuses
   useEffect(() => {
+    handleListLeadStatus()
+  }, [token, dispatch]);
+
+  const handleDropDown = () =>{
     const formData = new FormData();
-    formData.append("token", data.token);
+    formData.append("token", token);
     dropdownEnquiry(formData)
       .then((response) => {
-        dispatch(handleEnquiryList(response.data.data));
+        setEnquiry(response.data.data);
       })
       .catch((Err) => {
         console.log("Enquiry Dropdown Error:", Err);
       });
     dropdownCompetitor(formData)
       .then((response) => {
-        dispatch(handleCompetitorList(response.data.data));
+        setCompetitor(response.data.data);
       })
       .catch((err) => {
         console.log("Competitor Dropdown Error:", err);
       });
-  }, [formik.values.leadStatus, data.token, dispatch]);
+  }
+
+  // Fetch enquiry types and competitors
+  useEffect(() => {
+    handleDropDown();
+  }, [formik.values.leadStatus, token, dispatch]);
 
   return (
     <>
@@ -136,7 +144,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
               onBlur={() => formik.setFieldTouched("leadStatus", true)}
               allowClear
             >
-              {selector.leadStatusList?.map((item) => (
+              {leadStatusList?.map((item) => (
                 <Select.Option key={item.leadStatusId} value={item.leadStatusId}>
                   {item.leadStatusName}
                 </Select.Option>
@@ -166,7 +174,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
                 <Select
                   style={{ width: 120 }}
                   allowClear
-                  options={selector.competitorList?.map((comp) => ({
+                  options={competitor?.map((comp) => ({
                     label: comp.competitorName,
                     value: comp.competitorId,
                   }))}
@@ -220,6 +228,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
                   value={formik.values.follow_up_date}
                   onChange={(date, dateString) => {
                     formik.setFieldValue("follow_up_date", date);
+                    setDate(dateString);
                   }}
                   onBlur={() => formik.setFieldTouched("follow_up_date", true)}
                 />
@@ -234,7 +243,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
                   onBlur={() => formik.setFieldTouched("enquiry_type", true)}
                   allowClear
                 >
-                  {selector.enquiryList?.map((item) => (
+                  {enquiry?.map((item) => (
                     <Select.Option key={item.enquiryId} value={item.enquiryId}>
                       {item.enquiryName}
                     </Select.Option>

@@ -11,6 +11,11 @@ import Leads from '../Screens/Home/Leads/Leads.js';
 import ForgotPassword from '../Screens/Login/ForgotPassword/ForgotPassword.js';
 import VerifyOtp from '../Screens/Login/VerifyOTP/VerifyOtp.js';
 import ResetPassword from '../Screens/Login/ResetPassword/ResetPassword.js';
+import Requirements from '../Screens/Home/Masters/Requirements/Requirements.js';
+import Enquiry from '../Screens/Home/Masters/Enquiry/Enquiry.js';
+import Category from '../Screens/Home/Masters/Category/Category.js';
+import LeadsAddModal from '../Screens/Home/Modal/LeadsModals/LeadAddModal.js';
+import LeadsEditModal from '../Screens/Home/Modal/LeadsModals/LeadsEditModal.js';
 
 export const router = createBrowserRouter([
     {
@@ -63,8 +68,29 @@ export const router = createBrowserRouter([
                         path: "lead",
                         element: <Leads/>
                     },
+                    {
+                        path: "requirements",
+                        element: <Requirements/>
+                    },
+                    {
+                        path: "enquiry",
+                        element: <Enquiry/>
+                    },
+                    {
+                        path: "category",
+                        element: <Category/>
+                    },
+                    {
+                        path: "leadsAdd",
+                        element: <LeadsAddModal/>
+                    },
+                    {
+                        path: "leadsUpdate",
+                        element: <LeadsEditModal/>
+                    },
 
                 ]
+
             }
         ]
     }

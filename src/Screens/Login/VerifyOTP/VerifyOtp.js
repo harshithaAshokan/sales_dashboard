@@ -125,9 +125,9 @@ export default function ResetPassword() {
           {/* Resend OTP Button */}
           {showResendButton && (
             <Button
-              type="default"
+              type="primary"
               block
-              className={classes.resendOtpButton}
+              className={classes.createAccountButton}
               onClick={handleResendOtp}
             >
               Resend OTP

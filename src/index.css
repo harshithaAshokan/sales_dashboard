@@ -58,3 +58,7 @@ code {
   color:#1e1e2f;
 }
 
+.ant-table-row {
+  border-color: red;
+}
+
