@@ -1,113 +1,131 @@
-import React from 'react';
-import { Button, Form, Input, Space, theme } from 'antd';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useDispatch, useSelector } from 'react-redux';
-import { handleSearch } from '../../../redux/reducers/AuthReducers';
-
-const FilterModal = ({listapical}) => {
-  const { token } = theme.useToken();
-  const dispatch = useDispatch();
+import React from "react";
+import { Button, Form, Input, Space, theme } from "antd";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useSelector } from "react-redux";
+const FilterModal = ({ listapical }) => {
   const selector = useSelector((state) => state.auth);
 
   // Validation schema
   const userValidationSchema = Yup.object({
-    email: Yup.string().email('Invalid email format'),
+    email: Yup.string().email("Invalid email format"),
     userName: Yup.string(),
     dealer_id: Yup.number(),
-    phoneNumber: Yup.string().matches(/^[6789][0-9]{9}$/, 'Number must be 10 digits'),
+    phoneNumber: Yup.string().matches(
+      /^[6789][0-9]{9}$/,
+      "Number must be 10 digits"
+    ),
   });
 
   const handleReset = () => {
-    formik.resetForm();
+    resetForm();
     listapical();
-  }
+  };
 
-  const formik = useFormik({
+  const {values,touched,errors,handleBlur,handleChange,handleSubmit,resetForm} = useFormik({
     initialValues: {
-      userName: '',
-      email: '',
-      phoneNumber: '',
-      dealer_id: '',
+      userName: "",
+      email: "",
+      phoneNumber: "",
+      dealer_id: "",
     },
     validationSchema: userValidationSchema,
     onSubmit: (values) => {
-      console.log('Form values on submit:', values);
-      listapical(1,10,values)
+      console.log("Form values on submit:", values);
+      listapical(1, 10, values);
     },
   });
   return (
     <>
-      <div className='row'>
-        <div className='col'>
+      <div className="row">
+        <div className="col">
           <InputField
-          formik={formik}
-          name="userName"
-          label="User Name"
-          placeholder="Enter User Name"
-        />
+           
+            name="userName"
+            label="User Name"
+            placeholder="Enter User Name"
+            value={values.userName}
+            touched={touched}
+            errors={errors}
+            handleBlur={handleBlur}
+            handleChange={handleChange}
+          />
         </div>
-        <div className='col'>
+        <div className="col">
           <InputField
-          formik={formik}
-          name="phoneNumber"
-          label="Phone Number"
-          placeholder="Enter Phone Number"
-        />
+           
+            name="phoneNumber"
+            label="Phone Number"
+            placeholder="Enter Phone Number"
+            value={values.phoneNumber}
+            touched={touched}
+            errors={errors}
+            handleBlur={handleBlur}
+            handleChange={handleChange}
+          />
         </div>
-        <div className='col'>
+        <div className="col">
           <InputField
-          formik={formik}
-          name="email"
-          label="Email address"
-          placeholder="Enter Email"
-        />
-        </div> 
-        <div className='col'>
-          {
-          selector.userType == '4' && (<InputField
-          formik={formik}
-          name="dealer_id"
-          label="Dealer"
-          type="number"
-          placeholder="Enter Dealer"
-        />)
-        }
+           
+            name="email"
+            label="Email address"
+            placeholder="Enter Email"
+            value={values.email}
+            touched={touched}
+            errors={errors}
+            handleBlur={handleBlur}
+            handleChange={handleChange}
+          />
+        </div>
+        <div className="col">
+          {selector.userType == "4" && (
+            <InputField
+             
+              name="dealer_id"
+              label="Dealer"
+              type="number"
+              placeholder="Enter Dealer"
+              value={values.dealer_id}
+            touched={touched}
+            errors={errors}
+            handleBlur={handleBlur}
+            handleChange={handleChange}
+            />
+          )}
         </div>
       </div>
-      
-        <Space size="small">
-         
-          <Button type="primary" onClick={formik.handleSubmit}>
-            Search
-          </Button>
 
-          <Button onClick={handleReset}>
-            Reset
-          </Button>
-        </Space>
-      
+      <Space size="small">
+        <Button type="primary" onClick={handleSubmit}>
+          Search
+        </Button>
+
+        <Button onClick={handleReset}>Reset</Button>
+      </Space>
     </>
   );
 };
 
 export default FilterModal;
 
-function InputField({ formik, name, type = 'text', placeholder }) {
+function InputField({ name, type = "text", placeholder,touched,errors,handleBlur,handleChange,value }) {
   return (
     <Form.Item
-    
       name={name}
-      validateStatus={formik.touched[name] && formik.errors[name] ? 'error' : ''}
-      help={formik.touched[name] && formik.errors[name] ? formik.errors[name] : ''}
+      validateStatus={
+        touched[name] && errors[name] ? "error" : ""
+      }
+      help={
+        touched[name] && errors[name] ? errors[name] : ""
+      }
     >
       <Input
         name={name}
         type={type}
         placeholder={placeholder}
-        value={formik.values[name]}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlur}
       />
     </Form.Item>
   );

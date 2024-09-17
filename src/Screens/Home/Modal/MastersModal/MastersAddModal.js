@@ -1,23 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Modal, Form,Input,message } from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
+import {useSelector } from "react-redux";
 
 import { createMasters, updateMasters} from "../../../../axios/services";
-import { handleShowAddModal, handleShowUpdateModal } from "../../../../redux/reducers/AuthReducers";
+
 import { useToken } from "../../../../utility/hooks";
 
-export default function MastersAddModal({listapical,value}) {
-  const dispatch = useDispatch();
+export default function MastersAddModal({listapical,value,close,add,update}) {
+  
  
   const token = useToken();
   const selector = useSelector((state) => state.auth);
   
   const handleCancel = () => {
-    console.log("Clicked cancel button");
-    dispatch(handleShowAddModal(false));
-    dispatch(handleShowUpdateModal(false));
+   close();
   };
 
   const formItemLayout = {
@@ -31,7 +29,7 @@ export default function MastersAddModal({listapical,value}) {
     if(value === 'category')
     {
         const List = selector.categoryList?.find((ele) => ele.customerCategoryId === selector.user_id)
-       formik.setValues({
+       setValues({
       name:List.customerCategoryName
     })
 
@@ -39,7 +37,7 @@ export default function MastersAddModal({listapical,value}) {
     if(value === 'Enquiry')
         {
             const List = selector.enquiryListData?.find((ele) => ele.enquireId === selector.user_id)
-           formik.setValues({
+           setValues({
           name:List.enquireTypeName
         })
     
@@ -47,7 +45,7 @@ export default function MastersAddModal({listapical,value}) {
         if(value === 'requirements')
             {
                 const List = selector.requirementsList?.find((ele) => ele.RequirementsId === selector.user_id)
-               formik.setValues({
+               setValues({
               name:List.RequirementsName
             })
         
@@ -59,7 +57,7 @@ export default function MastersAddModal({listapical,value}) {
     const formData = new FormData();
     formData.append("token", token);
     formData.append("name", values.name);
-    if(selector.showAddModal)
+    if(add)
     {
       
        createMasters(formData,value)
@@ -76,7 +74,7 @@ export default function MastersAddModal({listapical,value}) {
         console.error("API error:", err);
       }); 
     }
-      if(selector.showUpdateModal)
+      if(update)
         {
             formData.append("dataId",selector.user_id)
             updateMasters(formData,value).then((response) => {
@@ -96,7 +94,7 @@ export default function MastersAddModal({listapical,value}) {
     
   });
 
-  const formik = useFormik({
+  const {values,errors,touched,handleBlur,handleChange,handleSubmit,setValues} = useFormik({
     initialValues: {
       
       name: "",
@@ -110,10 +108,10 @@ export default function MastersAddModal({listapical,value}) {
   });
 
   useEffect(() => {
-    if(selector.showUpdateModal) {
+    if(update) {
        handleUpdateList(); 
     }
-  },[selector.showUpdateModal])
+  },[update])
 
  
   
@@ -122,9 +120,9 @@ export default function MastersAddModal({listapical,value}) {
     <>
   
     <Modal
-      title={"ADD DETAILS"}
-      open={selector.showAddModal||selector.showUpdateModal}
-      onOk={formik.handleSubmit}
+      title={update?"EDIT DETAILS":"ADD DETAILS"}
+      open={true}
+      onOk={handleSubmit}
       onCancel={handleCancel}
     >
       <Form
@@ -134,10 +132,14 @@ export default function MastersAddModal({listapical,value}) {
       >
        
         <InputField
-          formik={formik}
           name="name"
           label="Name"
           placeholder="Enter Name"
+          value={values.name}
+          touched={touched}
+          errors={errors}
+          handleBlur={handleBlur}
+          handleChange={handleChange}
         />
       </Form>
     </Modal>
@@ -145,21 +147,21 @@ export default function MastersAddModal({listapical,value}) {
   );
 }
 
-function InputField({ formik, label, name, type = "text", placeholder }) {
+function InputField({ label, name, type = "text", placeholder,value,touched,errors,handleBlur,handleChange }) {
   return (
     <>
       <Form.Item
         label={label}
-        validateStatus={formik.touched[name] && formik.errors[name] ? "error" : ""}
-        help={formik.touched[name] && formik.errors[name] ? formik.errors[name] : ""}
+        validateStatus={touched[name] && errors[name] ? "error" : ""}
+        help={touched[name] && errors[name] ? errors[name] : ""}
       >
         <Input
           name={name}
           type={type}
           placeholder={placeholder}
-          value={formik.values[name]}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
         />
       </Form.Item>
     </>

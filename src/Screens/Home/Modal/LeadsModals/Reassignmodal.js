@@ -3,14 +3,12 @@ import { Modal,Select,Form } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as Yup from "yup"
-import { handleDealerId, handleEmployeeId, handleReassign, handleUpdateStatusModal } from '../../../../redux/reducers/AuthReducers';
 import { dealerDropdown, employeeDropdown, leadReassign } from '../../../../axios/services';
 import { useToken } from '../../../../utility/hooks';
-export default function Reassignmodal({listapical}) {
+export default function Reassignmodal({listapical,close}) {
 
     const selector = useSelector((state) => state.auth);
     const token = useToken();
-    const dispatch = useDispatch();
     const [dealerId,setDealerId] = useState([])
     const [employeeId,setEmployeeId] = useState([])
     const handleOk = (values) =>{
@@ -22,14 +20,14 @@ export default function Reassignmodal({listapical}) {
        leadReassign(formData).then((res) => {
         console.log(res.data,"result");
         listapical();
-        dispatch(handleReassign(false));
+       close();
        }).catch((err) => {
         console.log(err);
        })
         
     }
     const handleCancel = () => {
-        dispatch(handleReassign(false));
+       close();
     }
 
     const userValidationSchema = Yup.object({
@@ -38,7 +36,7 @@ export default function Reassignmodal({listapical}) {
         
       });
     
-      const formik = useFormik({
+      const {values,handleBlur,handleChange,handleSubmit,touched,errors,setFieldTouched,setFieldValue} = useFormik({
         initialValues: {
           employeeId: "",
           dealerId:""
@@ -60,25 +58,25 @@ export default function Reassignmodal({listapical}) {
         })
       },[])
       useEffect(() => {
-        if(formik.values.dealerId != "") {
+        if(values.dealerId != "") {
           const formData = new FormData();
         formData.append("token",token)
-        formData.append("dealerId",formik.values.dealerId);
+        formData.append("dealerId",values.dealerId);
         employeeDropdown(formData).then((res) => {
           console.log(res.data.data)
           setEmployeeId(res.data.data)
         })
         }
         
-      },[formik.values.dealerId])
+      },[values.dealerId])
 
     return (
       <>
         <Modal
           title="Reassign"
           centered
-          open={selector.reassignlead}
-          onOk={formik.handleSubmit}
+          open={true}
+          onOk={handleSubmit}
           onCancel={handleCancel}
         >
          <Form>
@@ -88,14 +86,14 @@ export default function Reassignmodal({listapical}) {
 <Form.Item
   name="dealerId"
   label="Dealer"
-  validateStatus={formik.touched.dealerId && formik.errors.dealerId? "error" : ""}
-  help={formik.touched.dealerId && formik.errors.dealerId? formik.errors.dealerId : ""}
+  validateStatus={touched.dealerId && errors.dealerId? "error" : ""}
+  help={touched.dealerId && errors.dealerId? errors.dealerId : ""}
 >
   <Select
     placeholder="Select Dealer"
-    value={formik.values.dealerId}
-    onChange={(value) => formik.setFieldValue("dealerId", value)}
-    onBlur={() => formik.setFieldTouched("dealerId", true)}
+    value={values.dealerId}
+    onChange={(value) => setFieldValue("dealerId", value)}
+    onBlur={() => setFieldTouched("dealerId", true)}
     allowClear
   >
     {dealerId?.map((item) => (
@@ -109,16 +107,16 @@ export default function Reassignmodal({listapical}) {
 <Form.Item
   name="employeeId"
   label="Employee"
-  validateStatus={formik.touched.employeeId && formik.errors.employeeId ? "error" : ""}
-  help={formik.touched.employeeId && formik.errors.employeeId ? formik.errors.employeeId : ""}
+  validateStatus={touched.employeeId && errors.employeeId ? "error" : ""}
+  help={touched.employeeId && errors.employeeId ? errors.employeeId : ""}
 >
   <Select
     placeholder="Select Employee"
-    value={formik.values.employeeId}
-    onChange={(value) => formik.setFieldValue("employeeId", value)}
-    onBlur={() => formik.setFieldTouched("employeeId", true)}
+    value={values.employeeId}
+    onChange={(value) => setFieldValue("employeeId", value)}
+    onBlur={() => setFieldTouched("employeeId", true)}
     allowClear
-    disabled={formik.values.dealerId === ""}
+    disabled={values.dealerId === ""}
   >
     {employeeId?.map((item) => (
       <Select.Option key={item.userId} value={item.userId}>

@@ -1,68 +1,64 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  handleDealerList,
-  handleSearch,
-  handleShowAddModal,
-  handleShowDeleteModal,
-  handleShowUpdateModal,
   handleUserId,
-  handleUserType
+  handleUserType,
 } from "../../../redux/reducers/AuthReducers";
-import classes from './Dealer.module.css';
-import { Space, Table, Layout, Typography, Popover,Pagination, Tooltip } from "antd";
-
+import classes from "./Dealer.module.css";
+import { Space, Table, Layout, Typography, Pagination, Tooltip } from "antd";
 import AddModal from "../Modal/AddModal";
 import DeleteModal from "../Modal/DeleteModal";
-import UpdateModal from "../Modal/UpdateModal";
 import { listUsers } from "../../../axios/services";
 import FilterModal from "../Modal/FilterModal";
-import deleteicon from '../../../assets/delete.png'
-import updateicon from '../../../assets/system-update.png'
-import filtericon from '../../../assets/setting.png'
-import addicon from '../../../assets/invite.png'
-import reseticon from '../../../assets/reset.png'
+import deleteicon from "../../../assets/delete.png";
+import updateicon from "../../../assets/system-update.png";
+import filtericon from "../../../assets/setting.png";
 import { useToken } from "../../../utility/hooks";
 const { Content } = Layout;
 const { Title } = Typography;
-const text = <span>Filter</span>;
 
 export default function Dealer() {
   const dispatch = useDispatch();
   const selector = useSelector((state) => state.auth);
   const token = useToken();
-  const [currentPage, setCurrentPage] = useState(1); 
-  const [totalItems, setTotalItems] = useState(0);
-  const [dealerList,setDealerList] = useState([]);
-  const [filter,setFilter] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [dealerList, setDealerList] = useState([]);
+  const [filter, setFilter] = useState(false);
+  const [addModal, setAddModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const handleAdd = () => {
-    dispatch(handleShowAddModal(true));
+    setAddModal(true);
     dispatch(handleUserType(3));
   };
 
   const handleDelete = (userId) => {
-    dispatch(handleShowDeleteModal(true));
     dispatch(handleUserId(userId));
+    setDeleteModal(true);
   };
 
-
-
+  const handleClose = () => {
+    setAddModal(false);
+    setDeleteModal(false);
+    setEditModal(false);
+  };
 
   const handleUpdate = (userId) => {
-    dispatch(handleShowUpdateModal(true));
     dispatch(handleUserId(userId));
     dispatch(handleUserType(3));
+    setEditModal(true);
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page); 
-    };
+    setCurrentPage(page);
+  };
 
-  const handleDealer = (page = 1, pageSize = 10,values) => {
+  const handleDealer = (page = 1, pageSize = 10, values) => {
     const formData = new FormData();
     formData.append("token", token);
     formData.append("type", "3");
-    
+
     if (values?.userName) {
       formData.append("username", values.userName);
     }
@@ -89,25 +85,15 @@ export default function Dealer() {
   useEffect(() => {
     if (token) {
       handleDealer(currentPage);
-      dispatch(handleUserType(3))
-      
+      dispatch(handleUserType(3));
     }
-  }, [token,currentPage,selector.search]);
-
- 
+  }, [token, currentPage, selector.search]);
 
   const columns = [
     {
       title: "S.No",
       dataIndex: "index",
-      key: "index",
-      
-    },
-    {
-      title: "User ID",
-      dataIndex: "userId",
-      key: "userId",
-      render: (text) => <a>{text}</a>,
+      render: (text, record, index) => index + 1 + (currentPage - 1) * 10,
     },
     {
       title: "Username",
@@ -134,14 +120,22 @@ export default function Dealer() {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <Tooltip placement="bottom" title="Update" >
-<img src={updateicon} width="20px" height="20px" onClick={() => handleUpdate(record.userId)}></img>
+          <Tooltip placement="bottom" title="Update">
+            <img
+              src={updateicon}
+              width="20px"
+              height="20px"
+              onClick={() => handleUpdate(record.userId)}
+            ></img>
           </Tooltip>
-          <Tooltip placement="bottom" title="Delete" >
-<img src={deleteicon} width="20px" height="20px" onClick={() => handleDelete(record.userId)}></img>
+          <Tooltip placement="bottom" title="Delete">
+            <img
+              src={deleteicon}
+              width="20px"
+              height="20px"
+              onClick={() => handleDelete(record.userId)}
+            ></img>
           </Tooltip>
-          
-          
         </Space>
       ),
     },
@@ -149,13 +143,13 @@ export default function Dealer() {
 
   const datas =
     dealerList.length > 0
-      ? dealerList.map((item,index) => ({
-        index:index+1, 
-        userId: item.userId,
-          username: item.userName,
-          name: item.name,
-          email: item.email,
-          phoneNumber: item.phoneNumber,
+      ? dealerList.map((item, index) => ({
+          key: item?.userId, // Optionally, use the userId as the key for better React rendering
+          username: item?.userName,
+          name: item?.name,
+          email: item?.email,
+          phoneNumber: item?.phoneNumber,
+          userId: item?.userId,
         }))
       : [];
 
@@ -166,26 +160,50 @@ export default function Dealer() {
           <Title level={1} className={classes.title}>
             Dealer Management
           </Title>
-          <button className='btn btn-primary' onClick={handleAdd}>Add Admin</button>
-          <img src={filtericon} width="20px" height="20px" onClick={() => setFilter(!filter)}></img>
-      </div>
-      <div className="ms-5"> {filter && <FilterModal listapical={handleDealer}/>}</div>
-        <Table 
-          columns={columns} 
-          dataSource={datas} 
+          <button className="btn btn-primary" onClick={handleAdd}>
+            Add Admin
+          </button>
+          <img
+            src={filtericon}
+            width="20px"
+            height="20px"
+            onClick={() => setFilter(!filter)}
+          ></img>
+        </div>
+        <div className="ms-5">
+          {" "}
+          {filter && <FilterModal listapical={handleDealer} />}
+        </div>
+        <Table
+          columns={columns}
+          dataSource={datas}
           pagination={false}
           className={classes.table}
         />
-        {selector.showAddModal && <AddModal listapical={handleDealer} />}
-        {selector.showDeleteModal && <DeleteModal listapical={handleDealer} />}
-        {selector.showUpdateModal && <UpdateModal listapical={handleDealer} />}
+        {addModal && (
+          <AddModal
+            listapical={handleDealer}
+            addModal={addModal}
+            close={handleClose}
+          />
+        )}
+        {deleteModal && (
+          <DeleteModal listapical={handleDealer} close={handleClose} />
+        )}
+        {editModal && (
+          <AddModal
+            listapical={handleDealer}
+            editModal={editModal}
+            close={handleClose}
+          />
+        )}
         <Pagination
-         current={currentPage}
-         pageSize={10} 
-         total={totalItems} 
-         onChange={handlePageChange}
-         style={{ textAlign: 'center' }} 
-            />
+          current={currentPage}
+          pageSize={10}
+          total={totalItems}
+          onChange={handlePageChange}
+          style={{ textAlign: "center" }}
+        />
       </Content>
     </Layout>
   );

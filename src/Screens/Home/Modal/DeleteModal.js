@@ -1,14 +1,12 @@
 import React from 'react';
 import { Modal, message } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { handleShowDeleteModal } from '../../../redux/reducers/AuthReducers';
+import { useSelector } from 'react-redux';
 import { deleteuser } from '../../../axios/services';
 import { useToken } from '../../../utility/hooks';
 
-export default function DeleteModal({ listapical }) {
+export default function DeleteModal({ listapical,close }) {
   const selector = useSelector((state) => state.auth);
   const token = useToken();
-  const dispatch = useDispatch();
   
   const handleOk = () => {
     const formData = new FormData();
@@ -19,8 +17,8 @@ export default function DeleteModal({ listapical }) {
       .then((response) => {
         console.log(response.data);
         message.success(response.data.msg)
-            dispatch(handleShowDeleteModal(false));
             listapical(); 
+            close();
       })
       .catch((err) => {
         console.log(err);
@@ -28,7 +26,7 @@ export default function DeleteModal({ listapical }) {
   };
 
   const handleCancel = () => {
-    dispatch(handleShowDeleteModal(false));
+   close();
   };
 
   return (
@@ -36,7 +34,7 @@ export default function DeleteModal({ listapical }) {
       <Modal
         title="Confirm Deletion"
         centered
-        open={selector.showDeleteModal}
+        open={true}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="Delete"

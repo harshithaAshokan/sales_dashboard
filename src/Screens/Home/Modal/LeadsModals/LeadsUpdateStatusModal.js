@@ -9,12 +9,9 @@ import {
 } from "../../../../axios/services";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {
-  handleUpdateStatusModal,
-} from "../../../../redux/reducers/AuthReducers";
 import { useToken } from "../../../../utility/hooks";
 
-export default function LeadUpdateStatusModal({ listapical }) {
+export default function LeadUpdateStatusModal({ listapical ,close}) {
   const selector = useSelector((state) => state.auth);
   const token = useToken();
   const dispatch = useDispatch();
@@ -44,7 +41,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
       .then((response) => {
         console.log("API Response:", response); // Debugging
         listapical();
-        dispatch(handleUpdateStatusModal(false));
+        close()
       })
       .catch((err) => {
         console.log("API Error:", err);
@@ -52,7 +49,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
   };
 
   const handleCancel = () => {
-    dispatch(handleUpdateStatusModal(false));
+   close()
   };
 
   // Form validation schema
@@ -68,7 +65,7 @@ export default function LeadUpdateStatusModal({ listapical }) {
   });
 
   // Formik initialization
-  const formik = useFormik({
+  const {values,handleBlur,handleChange,handleSubmit,setFieldValue,setFieldTouched} = useFormik({
     initialValues: {
       leadStatus: "",
       comments: "",
@@ -124,24 +121,30 @@ export default function LeadUpdateStatusModal({ listapical }) {
   // Fetch enquiry types and competitors
   useEffect(() => {
     handleDropDown();
-  }, [formik.values.leadStatus, token, dispatch]);
+  }, [
+    values.leadStatus, token, dispatch]);
 
   return (
     <>
       <Modal
         title="Update Lead Status"
         centered
-        open={selector.showUpdateStatusModal}
-        onOk={formik.handleSubmit}  // Ensure formik submission is linked
+        open={true}
+        onOk={
+          handleSubmit}  // Ensure formik submission is linked
         onCancel={handleCancel}
       >
-        <Form onFinish={formik.handleSubmit}>
+        <Form onFinish={
+          handleSubmit}>
           <Form.Item name="leadStatus">
             <Select
               placeholder="Select Lead Status"
-              value={formik.values.leadStatus}
-              onChange={(value) => formik.setFieldValue("leadStatus", value)}
-              onBlur={() => formik.setFieldTouched("leadStatus", true)}
+              value={
+                values.leadStatus}
+              onChange={(value) => 
+                setFieldValue("leadStatus", value)}
+              onBlur={() => 
+                setFieldTouched("leadStatus", true)}
               allowClear
             >
               {leadStatusList?.map((item) => (
@@ -152,23 +155,33 @@ export default function LeadUpdateStatusModal({ listapical }) {
             </Select>
           </Form.Item>
 
-          {(formik.values.leadStatus === 2 ||
-            formik.values.leadStatus === 4 ||
-            formik.values.leadStatus === 1 ||
-            formik.values.leadStatus === 9 ||
-            formik.values.leadStatus === 17 ||
-            formik.values.leadStatus === 6) && (
+          {(
+            values.leadStatus === 2 ||
+            
+            values.leadStatus === 4 ||
+            
+            values.leadStatus === 1 ||
+            
+            values.leadStatus === 9 ||
+            
+            values.leadStatus === 17 ||
+            
+            values.leadStatus === 6) && (
             <Form.Item name="comments">
               <Input
                 placeholder="Enter your comments"
-                value={formik.values.comments}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={
+                  values.comments}
+                onChange={
+                  handleChange}
+                onBlur={
+                  handleBlur}
               />
             </Form.Item>
           )}
 
-          {formik.values.leadStatus === 7 && (
+          {
+          values.leadStatus === 7 && (
             <>
               <Form.Item name="competitor">
                 <Select
@@ -179,68 +192,87 @@ export default function LeadUpdateStatusModal({ listapical }) {
                     value: comp.competitorId,
                   }))}
                   placeholder="Select Competitor"
-                  value={formik.values.competitor?.competitorName}
-                  onChange={(val, option) => formik.setFieldValue("competitor", option)}
+                  value={
+                    values.competitor?.competitorName}
+                  onChange={(val, option) => 
+                    setFieldValue("competitor", option)}
                 />
               </Form.Item>
               <Form.Item name="dropReason">
                 <Input
                   placeholder="Enter drop reason"
-                  value={formik.values.dropReason}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                  value={
+                    values.dropReason}
+                  onChange={
+                    handleChange}
+                  onBlur={
+                    handleBlur}
                 />
               </Form.Item>
             </>
           )}
 
-          {formik.values.leadStatus === 3 && (
+          {
+          values.leadStatus === 3 && (
             <>
               <Form.Item label="Demo Date">
                 <DatePicker
                   showTime
                   name="demo_date"
-                  value={formik.values.demo_date}
+                  value={
+                    values.demo_date}
                   onChange={(date, dateString) => {
-                    formik.setFieldValue("demo_date", date);
+                    
+                    setFieldValue("demo_date", date);
                     setDate(dateString);
                   }}
-                  onBlur={() => formik.setFieldTouched("demo_date", true)}
+                  onBlur={() => 
+                    setFieldTouched("demo_date", true)}
                 />
               </Form.Item>
               <Form.Item
                 name="comments"
-                value={formik.values.comments}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={
+                  values.comments}
+                onChange={
+                  handleChange}
+                onBlur={
+                  handleBlur}
               >
                 <Input placeholder="Enter your comments" />
               </Form.Item>
             </>
           )}
 
-          {formik.values.leadStatus === 5 && (
+          {
+          values.leadStatus === 5 && (
             <>
               <Form.Item label="Follow Up Date">
                 <DatePicker
                   showTime
                   name="follow_up_date"
-                  value={formik.values.follow_up_date}
+                  value={
+                    values.follow_up_date}
                   onChange={(date, dateString) => {
-                    formik.setFieldValue("follow_up_date", date);
+                    
+                    setFieldValue("follow_up_date", date);
                     setDate(dateString);
                   }}
-                  onBlur={() => formik.setFieldTouched("follow_up_date", true)}
+                  onBlur={() => 
+                    setFieldTouched("follow_up_date", true)}
                 />
               </Form.Item>
               <Form.Item name="enquiry_type" label="Enquiry Type">
                 <Select
                   placeholder="Select Enquiry Type"
-                  value={formik.values.enquiry_type}
+                  value={
+                    values.enquiry_type}
                   onChange={(value) =>
-                    formik.setFieldValue("enquiry_type", value)
+                    
+                    setFieldValue("enquiry_type", value)
                   }
-                  onBlur={() => formik.setFieldTouched("enquiry_type", true)}
+                  onBlur={() => 
+                    setFieldTouched("enquiry_type", true)}
                   allowClear
                 >
                   {enquiry?.map((item) => (
@@ -252,34 +284,44 @@ export default function LeadUpdateStatusModal({ listapical }) {
               </Form.Item>
               <Form.Item
                 name="comments"
-                value={formik.values.comments}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={
+                  values.comments}
+                onChange={
+                  handleChange}
+                onBlur={
+                  handleBlur}
               >
                 <Input placeholder="Enter your comments" />
               </Form.Item>
             </>
           )}
 
-          {formik.values.leadStatus === 24 && (
+          {
+          values.leadStatus === 24 && (
             <>
               <Form.Item label="POC Date">
                 <DatePicker
                   showTime
                   name="poc_date"
-                  value={formik.values.poc_date}
+                  value={
+                    values.poc_date}
                   onChange={(date, dateString) => {
-                    formik.setFieldValue("poc_date", date);
+                    
+                    setFieldValue("poc_date", date);
                     setDate(dateString);
                   }}
-                  onBlur={() => formik.setFieldTouched("poc_date", true)}
+                  onBlur={() => 
+                    setFieldTouched("poc_date", true)}
                 />
               </Form.Item>
               <Form.Item
                 name="comments"
-                value={formik.values.comments}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={
+                  values.comments}
+                onChange={
+                  handleChange}
+                onBlur={
+                  handleBlur}
               >
                 <Input placeholder="Enter your comments" />
               </Form.Item>

@@ -2,23 +2,11 @@ import React from 'react';
 import { Button, Form, Input, Space, theme } from 'antd';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-
-
-
 const MastersFilter = ({listapical}) => {
-  
-  
- 
- 
-  
-
-  // Validation schema
   const userValidationSchema = Yup.object({
     name: Yup.string(), 
   });
-
-  // Formik initialization
-  const formik = useFormik({
+  const {values,touched,errors,handleBlur,handleChange,handleSubmit,resetForm,setValues} = useFormik({
     initialValues: {
       name: '',
       
@@ -29,27 +17,31 @@ const MastersFilter = ({listapical}) => {
       listapical(1,10,values)
     },
   });
-
-  
   const handleReset = () => {
-    formik.resetForm();
+    resetForm();
+    setValues({
+      name:""
+    })
     listapical();
+    
   };
 
   return (
     <>
-      
-      
         <InputField
-          formik={formik}
           name="name"
           label="Name"
           placeholder="Enter Name"
+          value={values.name}
+          handleBlur={handleBlur}
+          handleChange={handleChange}
+          touched={touched}
+          errors={errors}
         />
 
         <Space size="small">
           {/* Search Button */}
-          <Button type="primary" onClick={formik.handleSubmit}>
+          <Button type="primary" onClick={handleSubmit}>
             Search
           </Button>
 
@@ -65,21 +57,21 @@ const MastersFilter = ({listapical}) => {
 
 export default MastersFilter;
 
-function InputField({ formik,  name, type = 'text', placeholder }) {
+function InputField({ name, type = 'text', placeholder,handleBlur,handleChange,touched,errors,value }) {
   return (
     <Form.Item
       
       name={name}
-      validateStatus={formik.touched[name] && formik.errors[name] ? 'error' : ''}
-      help={formik.touched[name] && formik.errors[name] ? formik.errors[name] : ''}
+      validateStatus={touched[name] && errors[name] ? 'error' : ''}
+      help={touched[name] && errors[name] ? errors[name] : ''}
     >
       <Input
         name={name}
         type={type}
         placeholder={placeholder}
-        value={formik.values[name]}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlur}
       />
     </Form.Item>
   );

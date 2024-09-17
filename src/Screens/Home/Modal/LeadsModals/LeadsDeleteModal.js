@@ -1,14 +1,13 @@
 import React from 'react';
 import { Modal } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { handleShowDeleteModal } from '../../../../redux/reducers/AuthReducers';
+import { useSelector } from 'react-redux';
 import { deleteLead } from '../../../../axios/services';
 import { useToken } from '../../../../utility/hooks';
-export default function LeadsDeleteModal({listapical}) {
+export default function LeadsDeleteModal({listapical,close}) {
 
     const selector = useSelector((state) => state.auth);
     const token = useToken();
-    const dispatch = useDispatch();
+   
     const handleOk = () =>{
         const formData = new FormData();
         formData.append("token",token)
@@ -16,21 +15,21 @@ export default function LeadsDeleteModal({listapical}) {
         deleteLead(formData).then((response) => {
             console.log(response.data);
             listapical();
-            dispatch(handleShowDeleteModal(false))     
+            close();    
         }).catch((err) => {
             console.log(err)
         })
         
     }
     const handleCancel = () => {
-        dispatch(handleShowDeleteModal(false))
+        close();
     }
     return (
       <>
         <Modal
           title="DELETE LEAD"
           centered
-          open={selector.showDeleteModal}
+          open={true}
           onOk={handleOk}
           onCancel={handleCancel}
         >

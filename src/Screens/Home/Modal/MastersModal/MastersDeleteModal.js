@@ -1,15 +1,15 @@
 import React from 'react';
 import { Modal, message } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { deleteMasters, deleteRequirements } from '../../../../axios/services';
-import { handleShowDeleteModal } from '../../../../redux/reducers/AuthReducers';
+import { useSelector } from 'react-redux';
+import { deleteMasters} from '../../../../axios/services';
+
 import { useToken } from '../../../../utility/hooks';
 
 
-export default function MastersDeleteModal({ listapical,value }) {
+export default function MastersDeleteModal({ listapical,value,close }) {
   const selector = useSelector((state) => state.auth);
   const token = useToken();
-  const dispatch = useDispatch();
+ 
   
   const handleOk = () => {
     const formData = new FormData();
@@ -19,14 +19,9 @@ export default function MastersDeleteModal({ listapical,value }) {
     deleteMasters(formData,value)
       .then((response) => {
         console.log(response.data);
-        message.success(response.data.msg).then(() => {
-          if(response.data.status)
-          {
-            dispatch(handleShowDeleteModal(false));
+        message.success(response.data.msg)
+           close();
             listapical(); 
-          }
-        });
-        
       })
       .catch((err) => {
         console.log(err);
@@ -34,7 +29,7 @@ export default function MastersDeleteModal({ listapical,value }) {
   };
 
   const handleCancel = () => {
-    dispatch(handleShowDeleteModal(false));
+   close();
   };
 
   return (
@@ -42,7 +37,7 @@ export default function MastersDeleteModal({ listapical,value }) {
       <Modal
         title="Confirm Deletion"
         centered
-        open={selector.showDeleteModal}
+        open={true}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="Delete"

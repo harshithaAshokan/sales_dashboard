@@ -1,3 +1,4 @@
+
 * {
   margin: 0;
   padding: 0;
@@ -58,7 +59,10 @@ code {
   color:#1e1e2f;
 }
 
-.ant-table-row {
-  border-color: red;
+.ant-table-row.active-row {
+  background-color: #c0b7e8; /* Your desired color for active rows */
 }
 
+.ant-table-row.inactive-row {
+  background-color: #fff; /* Color for inactive rows */
+}

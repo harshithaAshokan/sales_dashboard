@@ -1,66 +1,67 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import classes from './Enquiry.module.css';
-import { Space, Table, Layout, Typography, Popover,Pagination, Tooltip } from "antd";
-import deleteicon from '../../../../assets/delete.png'
-import updateicon from '../../../../assets/system-update.png'
-import filtericon from '../../../../assets/setting.png'
-import addicon from '../../../../assets/invite.png'
-import reseticon from '../../../../assets/reset.png'
-import { handleEnquiryListData, handleSearch, handleShowAddModal, handleShowDeleteModal, handleShowUpdateModal, handleUserId } from "../../../../redux/reducers/AuthReducers";
-import { listEnquiry} from "../../../../axios/services";
+import classes from "./Enquiry.module.css";
+import { Space, Table, Layout, Typography, Pagination, Tooltip } from "antd";
+import deleteicon from "../../../../assets/delete.png";
+import updateicon from "../../../../assets/system-update.png";
+import filtericon from "../../../../assets/setting.png";
+import {
+  handleEnquiryListData,
+  handleUserId,
+} from "../../../../redux/reducers/AuthReducers";
+import { listEnquiry } from "../../../../axios/services";
 import MastersAddModal from "../../Modal/MastersModal/MastersAddModal";
 import MastersDeleteModal from "../../Modal/MastersModal/MastersDeleteModal";
 import MastersFilter from "../../Modal/MastersModal/MastersFilter";
 import { useToken } from "../../../../utility/hooks";
 const { Content } = Layout;
 const { Title } = Typography;
-const text = <span>Filter</span>;
 
 export default function Enquiry() {
   const dispatch = useDispatch();
   const selector = useSelector((state) => state.auth);
   const token = useToken();
-  const [currentPage, setCurrentPage] = useState(1); 
-    const [totalItems, setTotalItems] = useState(0);
-  const[filter,setFilter] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [filter, setFilter] = useState(false);
+  const [update, setUpdate] = useState(false);
+  const [add, setAdd] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+
   const handleAdd = () => {
-    dispatch(handleShowAddModal(true));
+    setAdd(true);
   };
 
   const handleDelete = (userId) => {
-    dispatch(handleShowDeleteModal(true));
+    setDeleteModal(true);
     dispatch(handleUserId(userId));
   };
 
-  const handleReset = () => {
-    dispatch(handleSearch({}))
-    handleRequirementsData();
-  }
-
-  const content = (
-   <MastersFilter/>
-  );
+  const handleClose = () => {
+    setDeleteModal(false);
+    setAdd(false);
+    setUpdate(false);
+  };
 
   const handleUpdate = (userId) => {
-    dispatch(handleShowUpdateModal(true));
+    setUpdate(true);
     dispatch(handleUserId(userId));
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page); 
-    };
+    setCurrentPage(page);
+  };
 
-  const handleRequirementsData = (page = 1, pageSize = 10,values) => {
+  const handleRequirementsData = (page = 1, pageSize = 10, values) => {
     const formData = new FormData();
     formData.append("token", token);
     if (values?.name) {
       formData.append("name", values.name);
     }
-    listEnquiry(page,pageSize,formData)
+    listEnquiry(page, pageSize, formData)
       .then((response) => {
         dispatch(handleEnquiryListData(response.data.data.items));
-        console.log("message" , selector.message);
+        console.log("message", selector.message);
         setTotalItems(response.data.data.total_count);
       })
       .catch((error) => {
@@ -72,22 +73,15 @@ export default function Enquiry() {
     if (token) {
       handleRequirementsData(currentPage);
     }
-  }, [token,currentPage,selector.search]);
-
- 
+  }, [token, currentPage, selector.search]);
 
   const columns = [
     {
       title: "S.No",
       dataIndex: "index",
-      key: "index",
-      
+      render: (text, record, index) => index + 1 + (currentPage - 1) * 10,
     },
-    {
-      title: "ID",
-      dataIndex: "enquireId",
-      key: "enquireId",
-    },
+
     {
       title: "Name",
       dataIndex: "enquireTypeName",
@@ -98,14 +92,22 @@ export default function Enquiry() {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <Tooltip placement="bottom" title="Update" >
-<img src={updateicon} width="20px" height="20px" onClick={() => handleUpdate(record.enquireId)}></img>
+          <Tooltip placement="bottom" title="Update">
+            <img
+              src={updateicon}
+              width="20px"
+              height="20px"
+              onClick={() => handleUpdate(record.enquireId)}
+            ></img>
           </Tooltip>
-          <Tooltip placement="bottom" title="Delete" >
-<img src={deleteicon} width="20px" height="20px" onClick={() => handleDelete(record.enquireId)}></img>
+          <Tooltip placement="bottom" title="Delete">
+            <img
+              src={deleteicon}
+              width="20px"
+              height="20px"
+              onClick={() => handleDelete(record.enquireId)}
+            ></img>
           </Tooltip>
-          
-          
         </Space>
       ),
     },
@@ -117,33 +119,56 @@ export default function Enquiry() {
           <Title level={1} className={classes.title}>
             Enquire Management
           </Title>
-          
-              <button onClick={handleAdd} className="btn btn-primary">Add Enquire</button>
-          
-         
-         
-          <img src={filtericon} width="20px" height="20px" onClick={() => setFilter(!filter)}></img>
-          {filter && (<MastersFilter listapical={handleRequirementsData}/>)}
-        </div>
-       
-        
 
-        <Table 
-          columns={columns} 
-          dataSource={selector?.enquiryListData} 
+          <button onClick={handleAdd} className="btn btn-primary">
+            Add Enquire
+          </button>
+
+          <img
+            src={filtericon}
+            width="20px"
+            height="20px"
+            onClick={() => setFilter(!filter)}
+          ></img>
+          {filter && <MastersFilter listapical={handleRequirementsData} />}
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={selector?.enquiryListData}
           pagination={false}
           className={classes.table}
         />
-        {selector.showAddModal && <MastersAddModal listapical={handleRequirementsData} value="enquiry"/>}
-        {selector.showDeleteModal && <MastersDeleteModal listapical={handleRequirementsData} value="enquire_type"/>}
-        {selector.showUpdateModal && <MastersAddModal listapical={handleRequirementsData} value="Enquiry"/>}
+        {add && (
+          <MastersAddModal
+            listapical={handleRequirementsData}
+            value="enquiry"
+            close={handleClose}
+            add={add}
+          />
+        )}
+        {deleteModal && (
+          <MastersDeleteModal
+            listapical={handleRequirementsData}
+            value="enquire_type"
+            close={handleClose}
+          />
+        )}
+        {update && (
+          <MastersAddModal
+            listapical={handleRequirementsData}
+            value="Enquiry"
+            update={update}
+            close={handleClose}
+          />
+        )}
         <Pagination
-         current={currentPage}
-         pageSize={10} 
-         total={totalItems} 
-         onChange={handlePageChange}
-         style={{ textAlign: 'center' }} 
-            />
+          current={currentPage}
+          pageSize={10}
+          total={totalItems}
+          onChange={handlePageChange}
+          style={{ textAlign: "center" }}
+        />
       </Content>
     </Layout>
   );

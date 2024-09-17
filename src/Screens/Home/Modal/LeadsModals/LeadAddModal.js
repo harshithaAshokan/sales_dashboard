@@ -1,28 +1,81 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Select, message,Typography, Layout, Col,Row, Button } from "antd";
+import {  Form, Input, Select, message, Layout, Col,Row, Button } from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
-
-import { createLead, dropdownRequirements } from "../../../../axios/services";
+import {  useSelector } from "react-redux";
+import { createLead, dropdownRequirements, updateLead, viewLead } from "../../../../axios/services";
 import classes from './LeadAddModal.module.css'
-import FormItem from "antd/es/form/FormItem";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useToken } from "../../../../utility/hooks";
 const { Content } = Layout;
-const { Title } = Typography;
-export default function LeadsAddModal({ listapical }) {
-  const dispatch = useDispatch();
+
+export default function LeadsAddModal() {
+  
   const navigate = useNavigate();
+  const selector = useSelector((state) => state.auth); 
   const [componentVariant, setComponentVariant] = useState("filled");
   const token = useToken();
-  
+  const location = useLocation();
+  const modalType = location.state?.modalType || "" ;
   const [requirements, setRequirements] = useState([]);
+  console.log(modalType,"state");
   
+  const handleUpdate = () => {
+    const updateData = new FormData();
+    updateData.append("token", token);
+    updateData.append("leadId", selector.user_id);
+    viewLead(updateData)
+      .then((response) => {
+        console.log(response.data.data);
+        const selectedDealer = response.data.data;
+        setValues({
+            name: selectedDealer.name || "",
+            remarks: selectedDealer.remarks || "",
+            phone_country_code: selectedDealer.phone_country_code || "",
+            landline_number:selectedDealer.landline_number || "",
+            whatsapp_country_code: selectedDealer.whatsapp_country_code || "",
+            alter_country_code: selectedDealer.alter_country_code || "",
+            company_name:selectedDealer.company_name || "",
+            contact_person: selectedDealer.contact_person || "",
+            address:selectedDealer.address || "",
+            area: selectedDealer.area || "",
+            phone: selectedDealer.phoneNumber || "",
+            email: selectedDealer.email || "",
+            alternative_no: selectedDealer.alternative_no || "",
+            whatsapp_no: selectedDealer.whatsapp_no || "",
+            customer_category_id: selectedDealer.customer_category_id || "",
+            enquiry_type_id: selectedDealer.enquiry_type_id || "",
+            requirements_id: selectedDealer.requirementsId.reqId || "",
+            state: selectedDealer.state || "",
+            country: selectedDealer.country || "",
+            city: selectedDealer.city || "",
+            dealer_id: selectedDealer.dealer_id || "",
+            assignedTo: selectedDealer.assignedTo || "",
+            receivedDate: selectedDealer.receivedDate|| "",
+            referedBy:selectedDealer.referedBy|| "",
+            referedPhone: selectedDealer.referedPhone || "",
+            refer_country_code: selectedDealer.refer_country_code || "",
+            notes: selectedDealer.notes || "",
+            description: selectedDealer.description || "",
+            isNew: selectedDealer.isNew || "",
+            latitude: selectedDealer.latitude || "",
+            longitude: selectedDealer.longitude || "",
+            customerId: selectedDealer.customerCategoryId || "",
+            Pincode: selectedDealer.pincode || "",
+            schedule_date: selectedDealer.schedule_date || "",
+            upload_file: selectedDealer.upload_file || "",
+            approximate_amount: selectedDealer.approximate_amount || "",
+        });
+        console.log(selectedDealer);
+        
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
-  
-
-  const handleCreateUser = (values) => {
+  const handleUser = (values) => {
+    if(modalType === 'add') {
     const formData = new FormData();
     formData.append("token", token);
     formData.append("name", values.name);
@@ -71,7 +124,36 @@ export default function LeadsAddModal({ listapical }) {
       .catch((err) => {
         console.error("API error:", err);
       });
+    }
+    if(modalType === 'edit') {
+     
+        const formData = new FormData();
+        formData.append("token", token);
+        formData.append("name", values.name);
+        formData.append("phone_country_code", values.phone_country_code);
+        formData.append("address",values.address);
+        formData.append("phone",values.phone);
+        formData.append("requirements_id",values.requirements_id);
+        formData.append("leadId" , selector.user_id)
+        updateLead(formData)
+          .then((response) => {
+            console.log("API response:", response.data);
+            message.success(response.data.msg)
+            navigate("/lead")
+          })
+          .catch((err) => {
+            console.error("API error:", err);
+          });
+      
+    }
   };
+
+  useEffect(() => {
+    if(modalType === 'edit') {
+      handleUpdate();
+    }
+    
+  },[modalType])
 
   const userValidationSchema = Yup.object({
     email: Yup.string().email("Invalid email format"),
@@ -127,7 +209,7 @@ export default function LeadsAddModal({ listapical }) {
       .required("Phone number is required"),
   });
 
-  const formik = useFormik({
+  const {handleChange,handleBlur,handleSubmit,touched,errors,values,setFieldTouched,setValues,setFieldValue} = useFormik({
     initialValues: {
       name: "",
       remarks: "",
@@ -168,7 +250,7 @@ export default function LeadsAddModal({ listapical }) {
     },
     validationSchema: userValidationSchema,
     onSubmit: (values) => {
-      handleCreateUser(values);
+      handleUser(values);
     },
   });
   const handleRequirements = () => {
@@ -198,91 +280,141 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="name"
                 label="Name"
                 placeholder="Enter Name"
+                value={values.name}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="remarks"
                 label="Remarks"
                 placeholder="Enter Remarks"
+                value={values.remarks}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="phone_country_code"
                 label="Phone_country_code"
                 placeholder="Enter Phone_country_code"
+                value={values.phone_country_code}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="landline_number"
                 type="number"
                 label="Landline_number"
                 placeholder="Enter your Landline_number"
+                value={values.landline_number}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="whatsapp_country_code"
                 label="whatsapp_country_code"
                 placeholder="Enter your whatsapp_country_code"
+                value={values.whatsapp_country_code}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="alter_country_code"
                 label="alter_country_code"
                 placeholder="Enter your alter_country_code"
+                value={values.alter_country_code}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="company_name"
                 label="Company Name"
                 placeholder="Enter your Company Name"
+                value={values.company_name}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="contact_person"
                 label="contact_person"
                 placeholder="Enter your contact_person"
+                value={values.contact_person}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="address"
                 label="address"
                 placeholder="Enter your address"
+                value={values.address}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="city"
                 label="City"
                 placeholder="Enter your city"
+                value={values.city}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
@@ -290,77 +422,117 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="country"
                 label="Country"
                 placeholder="Enter your country"
+                value={values.country}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="state"
                 label="State"
                 placeholder="Enter your State"
+                value={values.state}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="area"
                 label="Area"
                 placeholder="Enter Area"
+                value={values.area}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="phone"
                 type="number"
                 label="Phone"
                 placeholder="Enter Phone"
+                value={values.phone}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="email"
                 type="email"
                 label="Email"
                 placeholder="Enter email"
+                value={values.email}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="alternative_no"
                 type="number"
                 label="Alternative_no"
                 placeholder="Enter alternative_no"
+                value={values.alternative_no}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="whatsapp_no"
                 type="number"
                 label="Whatsapp_no"
                 placeholder="Enter Whatsapp_no"
+                value={values.whatsapp_no}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="customer_category_id"
                 type="number"
                 label="customer_category_id"
                 placeholder="Enter customer_category_id"
+                value={values.customer_category_id}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
           </Row>
@@ -368,11 +540,16 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="enquiry_type_id"
                 type="number"
                 label="enquiry_type_id"
                 placeholder="Enter enquiry_type_id"
+                value={values.enquiry_type_id}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
             <Col span={12}>
@@ -380,29 +557,29 @@ export default function LeadsAddModal({ listapical }) {
                 name="requirements_id"
                 label="Requirements ID"
                 validateStatus={
-                  formik.touched.requirements_id &&
-                  formik.errors.requirements_id
+                  touched.requirements_id &&
+                  errors.requirements_id
                     ? "error"
                     : ""
                 }
                 help={
-                  formik.touched.requirements_id &&
-                  formik.errors.requirements_id
-                    ? formik.errors.requirements_id
+                  touched.requirements_id &&
+                  errors.requirements_id
+                    ? errors.requirements_id
                     : ""
                 }
               >
                 <Select
                   placeholder="Select Dealer ID"
-                  value={formik.values.requirements_id}
+                  value={values.requirements_id}
                   onChange={(value) =>
-                    formik.setFieldValue("requirements_id", value)
+                    setFieldValue("requirements_id", value)
                   }
-                  onBlur={() => formik.setFieldTouched("requirements_id", true)}
+                  onBlur={() => setFieldTouched("requirements_id", true)}
                   allowClear
                 >
                   {requirements.length > 0 ? (
-                    requirements.map((item) => (
+                    requirements?.map((item) => (
                       <Select.Option
                         key={item.RequirementsId}
                         value={item.RequirementsId}
@@ -423,40 +600,60 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="dealer_id"
                 type="number"
                 label="dealer_id"
                 placeholder="Enter dealer_id"
+                value={values.dealer_id}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="recievedDate"
                 type="number"
                 label="recievedDate"
                 placeholder="Enter recievedDate"
+                value={values.recievedDate}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="referedBy"
                 type="number"
                 label="referedBy"
                 placeholder="Enter referedBy"
+                value={values.referedBy}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="refer_country_code"
                 type="number"
                 label="refer_country_code"
                 placeholder="Enter refer_country_code"
+                value={values.refer_country_code}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
           </Row>
@@ -464,38 +661,58 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="notes"
                 label="notes"
                 placeholder="Enter notes"
+                value={values.notes}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="description"
                 label="description"
                 placeholder="Enter description"
+                value={values.description}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="isNew"
                 type="number"
                 label="isNew"
                 placeholder="Enter isNew"
+                value={values.isNew}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="latitude"
                 type="number"
                 label="Latitude"
                 placeholder="Enter Latitude"
+                value={values.latitude}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
@@ -503,20 +720,30 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="longitude"
                 type="number"
                 label="longitude"
                 placeholder="Enter longitude"
+                value={values.longitude}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
-                name="customerId"
+                
+                name="upload_file"
                 type="number"
                 label="customerId"
                 placeholder="Enter customerId"
+                value={values.upload_file}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
@@ -524,45 +751,66 @@ export default function LeadsAddModal({ listapical }) {
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="upload_file"
                 label="upload_file"
                 placeholder="Enter upload_file"
+                value={values.upload_file}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
             <Col span={12}>
               {" "}
               <InputField
-                formik={formik}
+                
                 name="approximate_amount"
                 type="number"
                 label="approximate_amount"
                 placeholder="Enter approximate_amount"
+                value={values.approximate_amount}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="pincode"
                 type="number"
                 label="Pincode"
                 placeholder="Enter pincode"
+                value={values.pincode}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
+
               />
             </Col>
             <Col span={12}>
               <InputField
-                formik={formik}
+                
                 name="schedule_date"
                 type="number"
                 label="schedule_date"
                 placeholder="Enter schedule_date"
+                value={values.schedule_date}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                 touched={touched}
+              errors={errors}
               />
            </Col>
           </Row>
           <Form.Item>
-            <Button onClick={formik.handleSubmit}>
+            <Button onClick={handleSubmit}>
               Submit
             </Button>
           </Form.Item>
@@ -575,26 +823,26 @@ export default function LeadsAddModal({ listapical }) {
   );
 }
 
-function InputField({ formik, label, name, type = "text", placeholder }) {
+function InputField({ label, name, type = "text", placeholder,value,touched,errors,handleBlur,handleChange }) {
   return (
     <>
       <Form.Item
         label={label}
         rules={[{required: true}]}
         validateStatus={
-          formik.touched[name] && formik.errors[name] ? "error" : ""
+          touched[name] && errors[name] ? "error" : ""
         }
         help={
-          formik.touched[name] && formik.errors[name] ? formik.errors[name] : ""
+          touched[name] && errors[name] ? errors[name] : ""
         }
       >
         <Input
           name={name}
           type={type}
           placeholder={placeholder}
-          value={formik.values[name]}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
         />
       </Form.Item>
     </>
