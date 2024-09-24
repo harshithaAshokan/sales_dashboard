@@ -42,22 +42,7 @@
 }
 
 /* Individual OTP input box */
-.inputBox {
-  width: 40px; /* Box width */
-  height: 40px; /* Box height */
-  text-align: center; /* Center the text */
-  font-size: 18px; /* Text size */
-  border-radius: 4px; /* Rounded corners */
-  background-color: #a49fc7 !important; /* Background color */
-  transition:0.2s ease-in-out;
-}
 
-/* Input box on focus */
-.inputBox:focus {
-  border-color: #6a5acd; /* Border color on focus */
-  box-shadow: 0 0 5px rgba(106, 90, 205, 0.5); /* Focus shadow */
-  outline: none; /* Remove default outline */
-}
 
 /* Button styles */
 .createAccountButton {
@@ -88,7 +73,7 @@
 }
 
 .createAccountButton:hover {
-  background-color: #5a4dcd !important;
+  background-color: #6a5acd !important;
   transform: scale(1.05);
 }
 

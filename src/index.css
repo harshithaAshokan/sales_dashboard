@@ -5,6 +5,10 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary-color: #6a5acd; /* Define a root variable for primary color */
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -20,15 +24,16 @@ code {
 }
 
 .ant-table-thead .ant-table-cell {
-  background-color: #6a5acd !important;
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
 }
 
 .ant-menu-item-active {
-  background-color: #6a5acd !important;
+  background-color: var(--primary-color) !important;
 }
 
 .ant-menu-item-selected {
-  background-color: #6a5acd !important;
+  background-color: var(--primary-color) !important;
 }
 
 .ant-layout .ant-layout-sider {
@@ -51,8 +56,19 @@ code {
   background-color: #c0b7e8 !important;
 }
 
+.ant-otp .ant-input:focus-within{
+  background-color: #c0b7e8 !important;
+  box-shadow: 0 0 8px rgba(106, 90, 205, 0.5);
+  
+}
+
+.ant-otp .ant-input-outlined {
+  border-color: #c0b7e8 !important;
+
+}
+
 .ant-card .ant-card-head {
-  background-color: #6a5acd !important;
+  background-color: var(--primary-color) !important;
 }
 
 .img {
@@ -60,9 +76,69 @@ code {
 }
 
 .ant-table-row.active-row {
-  background-color: #c0b7e8; /* Your desired color for active rows */
+  background-color: #c0b7e8 !important; /* Your desired color for active rows */
 }
 
 .ant-table-row.inactive-row {
-  background-color: #fff; /* Color for inactive rows */
+  background-color: #fff !important; /* Color for inactive rows */
 }
+
+.ant-form-item-control-input-content{
+  max-width: 100%;
+  height: fit-content;
+}
+
+.active-row .ant-table-cell-row-hover{
+  background-color: #c0b7e8 !important; /* Your desired color for active rows */
+}
+
+
+.ant-table-row:focus-within{
+  background-color: #c0b7e8 !important; 
+}
+
+
+.ant-menu-title-content {
+  color:#dad7e7  !important;
+}
+.ant-menu-title-content:hover {
+  color: white  !important;
+}
+.ant-menu-item-selected .ant-menu-title-content {
+  color: white !important;
+}
+
+.button {
+  background-color:#6a5acd !important;
+  color: white !important; 
+}
+
+.img {
+  color: var(--primary-color) !important;
+}
+
+.ant-table-cell {
+  font-size: small;
+}
+
+.ant-btn-primary{
+  background-color:#6a5acd !important;
+}
+
+.ant-card-head-title{
+  color: white !important;
+}
+
+.ant-form-item-control-input .ant-input-password:focus-within{
+  
+    background-color: #c0b7e8 !important;
+    box-shadow: 0 0 8px rgba(106, 90, 205, 0.5);
+
+}
+
+.ant-table-cell ::before {
+  background-color: #dad7e7 !important;
+}
+
+
+
